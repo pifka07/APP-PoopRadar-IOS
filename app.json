@@ -1,7 +1,4 @@
 {
-  "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-2590841526378095~3764279944"
-  },
   "expo": {
     "name": "Poop Radar",
     "slug": "snack-35410476-aebc-43a0-809d-a39274281671",
@@ -22,6 +19,7 @@
         "NSLocationWhenInUseUsageDescription": "Wir benötigen deinen Standort, um Haufen in deiner Nähe auf dem Radar anzuzeigen."
       },
       "config": {
+        "googleMapsApiKey": "AIzaSyDFVR8qhVCcWtr9tEa7-NjVwMPjOHw2a7E",
         "googleMobileAdsAppId": "ca-app-pub-2590841526378095~3764279944"
       }
     },
@@ -60,10 +58,7 @@
         "expo-notifications",
         {
           "icon": "./assets/icon.png",
-          "color": "#8B4513",
-          "modes": [
-            "productionMode"
-          ]
+          "color": "#8B4513"
         }
       ],
       [
@@ -72,9 +67,13 @@
           "androidAppId": "ca-app-pub-2590841526378095~3764279944",
           "iosAppId": "ca-app-pub-2590841526378095~3764279944"
         }
+      ],
+      [
+        "react-native-maps",
+        {
+          "iosGoogleMapsApiKey": "AIzaSyDFVR8qhVCcWtr9tEa7-NjVwMPjOHw2a7E"
+        }
       ]
     ]
   }
 }
-  
-

@@ -33,7 +33,9 @@
   "name": "PoopRadar",
   "version": "1.0.0",
   "devDependencies": {
+    "@expo/cli": "^57.0.12",
     "@react-native-community/cli": "^20.1.3",
-    "@react-native/metro-config": "^0.84.1"
+    "@react-native/metro-config": "^0.84.1",
+    "expo-dev-client": "^57.0.10"
   }
 }
