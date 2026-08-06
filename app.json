@@ -2,7 +2,7 @@
   "expo": {
     "name": "Poop Radar",
     "slug": "snack-35410476-aebc-43a0-809d-a39274281671",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.pifka.poopradar",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Wir benötigen deinen Standort, um Haufen in deiner Nähe auf dem Radar anzuzeigen."
+        "NSLocationWhenInUseUsageDescription": "Wir benötigen deinen Standort, um Haufen in deiner Nähe auf dem Radar anzuzeigen.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
         "googleMapsApiKey": "AIzaSyDFVR8qhVCcWtr9tEa7-NjVwMPjOHw2a7E",
@@ -48,11 +49,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra": {
-      "eas": {
-        "projectId": "744de408-fcd0-4202-a2f7-43fdeecf95c8"
-      }
-    },
     "plugins": [
       [
         "expo-notifications",
@@ -74,6 +70,12 @@
           "iosGoogleMapsApiKey": "AIzaSyDFVR8qhVCcWtr9tEa7-NjVwMPjOHw2a7E"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3a7fc31d-5554-4fb0-bf49-e263939f4d5d"
+      }
+    },
+    "owner": "pifka"
   }
 }

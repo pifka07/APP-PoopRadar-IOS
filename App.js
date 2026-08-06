@@ -70,9 +70,9 @@ const REPORT_TYPE_OPTIONS = [
 ];
 
 const REPORT_TYPE_EXPIRY_DAYS = {
-  POOP: 3,
+  POOP: 8,
   BIN_BAGS: null,
-  POISON: 5,
+  POISON: 10,
 };
 
 const getNormalizedReportType = (rawType) => {
