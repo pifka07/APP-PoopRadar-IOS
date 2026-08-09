@@ -776,13 +776,9 @@ export default function App() {
         if (nearbyPoop.length > 0 || nearbyPoison.length > 0) {
           startupNearbyInfoShown.current = true;
 
-          const parts = [];
-          if (nearbyPoop.length > 0) parts.push(`${nearbyPoop.length} Haufen`);
-          if (nearbyPoison.length > 0) parts.push(`${nearbyPoison.length} Giftköder`);
-
           const alertBody = nearbyPoop.length > 0
-            ? `Pass auf deine Snicker auf. In 500m Naehe gefunden: ${parts.join(', ')}`
-            : `Achtung: ${parts.join(', ')}`;
+            ? `Pass auf deine Snicker auf. In 500m Naehe gefunden: ${nearbyPoop.length} Haufen`
+            : `Achtung: ${nearbyPoison.length} Giftköder`;
 
           Alert.alert('Achtung', alertBody);
 
@@ -1038,7 +1034,7 @@ export default function App() {
           <View style={{ flex: 1 }}>
             <MapView 
               ref={mapRef} 
-              provider={PROVIDER_GOOGLE}
+              provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
               loadingEnabled
               loadingIndicatorColor="#8B4513"
               mapType="standard"
@@ -1069,11 +1065,12 @@ export default function App() {
               const lng = Number(marker.longitude);
 
               // Sicherheitscheck bleibt, damit die App nicht crasht
-              if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+              if (isNaN(lat) || isNaN(lng)) return null;
 
               const markerMeta = getReportTypeMeta(marker.size);
               const markerSize = markerMeta.markerSize;
-              const markerContainerSize = markerSize + 8;
+              const markerContainerSize = markerSize + 14;
+              const markerLabel = markerMeta.icon || markerMeta.shortLabel || '?';
 
               return (
                 <Marker 
@@ -1081,9 +1078,37 @@ export default function App() {
                   coordinate={{ latitude: lat, longitude: lng }}
                   onPress={() => setSelectedPoop(marker)}
                   anchor={{ x: 0.5, y: 0.5 }}
+                  tracksViewChanges={false}
                 >
-                  <View style={{ width: markerContainerSize, height: markerContainerSize, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ fontSize: markerSize, lineHeight: markerSize, textAlign: 'center' }}>{markerMeta.icon}</Text>
+                  <View
+                    style={{
+                      width: markerContainerSize,
+                      height: markerContainerSize,
+                      borderRadius: 999,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: markerMeta.markerBg,
+                      borderColor: markerMeta.markerBorder,
+                      borderWidth: 3,
+                      shadowColor: '#000',
+                      shadowOpacity: 0.25,
+                      shadowRadius: 6,
+                      shadowOffset: { width: 0, height: 3 },
+                      elevation: 8,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: Math.max(markerSize * 0.8, 18),
+                        fontWeight: '800',
+                        color: markerMeta.markerBorder,
+                        textAlign: 'center',
+                        includeFontPadding: false,
+                        lineHeight: Math.max(markerSize * 0.9, 20),
+                      }}
+                    >
+                      {markerLabel}
+                    </Text>
                   </View>
                 </Marker>
               );
@@ -1490,7 +1515,7 @@ const styles = StyleSheet.create({
   scoreTitle: { fontSize: 30, fontWeight: 'bold', color: '#8B4513' },
   scoreSubTitle: { color: '#999', marginBottom: 20 },
   scoreItem: { flexDirection: 'row', padding: 20, backgroundColor: 'white', borderRadius: 18, marginBottom: 12, alignItems: 'center' },
-  scoreRank: { fontSize: 20, fontWeight: 'bold', color: '#FF7F50', width: 45 },
+  scoreRank: { fontSize: 20, fontWeight: 'bold', color: '#FF7F50', minWidth: 60, textAlign: 'center', marginRight: 12 },
   infoCard: { position: 'absolute', bottom: 30, left: 20, right: 20, backgroundColor: 'white', padding: 25, borderRadius: 25 },
   infoTitle: { fontWeight: 'bold', fontSize: 20, marginBottom: 5 },
   deleteBtn: { backgroundColor: '#4CAF50', padding: 18, borderRadius: 15, marginTop: 10, alignItems: 'center' },
