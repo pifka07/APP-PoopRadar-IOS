@@ -291,12 +291,17 @@ export default function App() {
     }
   };
 
-  const triggerReportVibrationFeedback = () => {
+  const triggerReportVibrationFeedback = async () => {
     try {
-      Vibration.cancel();
-      Vibration.vibrate(180);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (vibError) {
-      console.log('Vibration fehlgeschlagen:', vibError);
+      console.log('Haptics fehlgeschlagen, fallback zu Vibration:', vibError);
+      try {
+        Vibration.cancel();
+        Vibration.vibrate(180);
+      } catch (fallbackError) {
+        console.log('Vibration-Fallback fehlgeschlagen:', fallbackError);
+      }
     }
   };
 
@@ -750,7 +755,7 @@ export default function App() {
       const sorted = Object.keys(counts)
         .map(city => ({ name: city, count: counts[city] }))
         .sort((a, b) => b.count - a.count)
-        .slice(0, 20);
+        .slice(0, 30);
       setCityStats(sorted);
 
       const effectiveLocation = passedLocation || locationRef.current || location;
@@ -1046,7 +1051,7 @@ export default function App() {
               }}
               style={styles.map} 
               showsUserLocation 
-              followsUserLocation={true} 
+              followsUserLocation={false} 
               initialRegion={location ? { 
                 latitude: location.latitude, 
                 longitude: location.longitude, 
@@ -1168,7 +1173,7 @@ export default function App() {
       {activeTab === 'Score' && (
         <View style={styles.scoreContainer}>
           <Text style={styles.scoreTitle}>🏆 City Ranking</Text>
-          <Text style={styles.scoreSubTitle}>Top 20 Städte</Text>
+          <Text style={styles.scoreSubTitle}>Top 30 Städte</Text>
           <FlatList 
             data={cityStats} 
             keyExtractor={(item) => item.name} 

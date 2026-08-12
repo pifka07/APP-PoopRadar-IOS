@@ -8,8 +8,9 @@ Stand: März 2026
 
 Verantwortlich für die Datenverarbeitung in dieser App ist:
 
-Fa. FRNK
-umdieecke7@gmail.com
+KORP
+T&W Zimmermann
+service@umdieecke.info
 
 2. Allgemeines
 
@@ -116,7 +117,7 @@ Diese Datenschutzerklärung kann bei Bedarf angepasst werden.
 
 Bei Fragen zum Datenschutz:
 
-umdieecke7@gmail.com
+service@umdieecke.info
 `;
 
 export const impressumText = `
