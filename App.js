@@ -110,6 +110,9 @@ export default function App() {
   const [cityStats, setCityStats] = useState([]);
   const [selectedSize, setSelectedSize] = useState('POOP');
   const [selectedPoop, setSelectedPoop] = useState(null);
+  const [isReportTypeExpanded, setIsReportTypeExpanded] = useState(true);
+  const [reportSuccessMessage, setReportSuccessMessage] = useState('');
+  const [showReportSuccessToast, setShowReportSuccessToast] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Radar');
   const [displayName, setDisplayName] = useState("Gast-Modus");
@@ -976,7 +979,12 @@ export default function App() {
       }
 
       const typeMeta = getReportTypeMeta(selectedSize);
-      Alert.alert("Erfolg", `${typeMeta.label} wurde gemeldet!${isPoopReport ? ` +${reportPoints} XP` : ''}`);
+      const successMessage = `${typeMeta.label} wurde gemeldet!${isPoopReport ? ` +${reportPoints} XP` : ''}`;
+      setReportSuccessMessage(successMessage);
+      setShowReportSuccessToast(true);
+      setTimeout(() => {
+        setShowReportSuccessToast(false);
+      }, 2000);
     } else {
       setMarkers(prevMarkers => prevMarkers.filter(m => m.id !== tempMarker.id));
       console.log(reportError);
@@ -1064,7 +1072,7 @@ export default function App() {
                 longitudeDelta: 0.05
               }}
             > 
-            {markers.map((marker, index) => {
+            {(markers.filter((marker) => getNormalizedReportType(marker.size) === 'POOP')).map((marker, index) => {
               const markerKey = marker.id ? marker.id.toString() : `temp-${index}`;
               const lat = Number(marker.latitude);
               const lng = Number(marker.longitude);
@@ -1074,7 +1082,7 @@ export default function App() {
 
               const markerMeta = getReportTypeMeta(marker.size);
               const markerSize = markerMeta.markerSize;
-              const markerContainerSize = markerSize + 14;
+              const markerContainerSize = markerSize + 12;
               const markerLabel = markerMeta.icon || markerMeta.shortLabel || '?';
 
               return (
@@ -1089,27 +1097,22 @@ export default function App() {
                     style={{
                       width: markerContainerSize,
                       height: markerContainerSize,
-                      borderRadius: 999,
                       justifyContent: 'center',
                       alignItems: 'center',
-                      backgroundColor: markerMeta.markerBg,
-                      borderColor: markerMeta.markerBorder,
-                      borderWidth: 3,
-                      shadowColor: '#000',
-                      shadowOpacity: 0.25,
-                      shadowRadius: 6,
-                      shadowOffset: { width: 0, height: 3 },
-                      elevation: 8,
+                      backgroundColor: 'transparent',
+                      borderWidth: 0,
+                      shadowOpacity: 0,
+                      elevation: 0,
                     }}
                   >
                     <Text
                       style={{
-                        fontSize: Math.max(markerSize * 0.8, 18),
-                        fontWeight: '800',
-                        color: markerMeta.markerBorder,
+                        fontSize: Math.max(markerSize + 4, 24),
+                        fontWeight: '700',
+                        color: '#8B4513',
                         textAlign: 'center',
                         includeFontPadding: false,
-                        lineHeight: Math.max(markerSize * 0.9, 20),
+                        lineHeight: Math.max(markerSize + 4, 24),
                       }}
                     >
                       {markerLabel}
@@ -1119,6 +1122,12 @@ export default function App() {
               );
             })}
           </MapView>
+
+          {showReportSuccessToast && (
+            <View style={styles.successToast} pointerEvents="none">
+              <Text style={styles.successToastText}>{reportSuccessMessage}</Text>
+            </View>
+          )}
           </View>
 
           {selectedPoop ? (
@@ -1135,36 +1144,44 @@ export default function App() {
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={[styles.overlay, styles.shadow]}>
-              <Text style={styles.overlayLabel}>MELDETYP WÄHLEN</Text>
-            <View style={styles.sizeRow}>
-                {REPORT_TYPE_OPTIONS.map(item => (
-                  <View key={item.id} style={{alignItems: 'center'}}>
-                    <TouchableOpacity 
-                      onPress={() => setSelectedSize(item.id)} 
-                      style={[
-                        styles.sizeBtn,
-                        { backgroundColor: selectedSize === item.id ? '#8B4513' : '#f0f0f0' }
-                      ]}
-                    >
-                      <Text style={{
-                        color: 'white', 
-                        fontWeight: 'bold', 
-                        fontSize: item.markerSize,
-                        includeFontPadding: false,
-                        textAlign: 'center'
-                      }}>
-                        {item.icon}
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={{marginTop: 8, fontWeight: 'bold', color: '#333', fontSize: 12}}>{item.shortLabel}</Text>
-                  </View>
-                ))}
-              </View>
-
-              <TouchableOpacity style={styles.mainReportBtn} onPress={reportPoop}>
-                <Text style={styles.mainReportBtnText}>MELDUNG ABSENDEN</Text>
+            <View style={[styles.overlay, styles.shadow, isReportTypeExpanded ? styles.overlayExpanded : styles.overlayCollapsed]}>
+              <TouchableOpacity onPress={() => setIsReportTypeExpanded((prev) => !prev)} style={styles.overlayToggleRow} activeOpacity={0.8}>
+                <Text style={styles.overlayLabel}>MELDETYP WÄHLEN</Text>
+                <Text style={styles.overlayToggleSymbol}>{isReportTypeExpanded ? '▾' : '▴'}</Text>
               </TouchableOpacity>
+
+              {isReportTypeExpanded && (
+                <>
+                  <View style={styles.sizeRow}>
+                    {REPORT_TYPE_OPTIONS.map(item => (
+                      <View key={item.id} style={{alignItems: 'center'}}>
+                        <TouchableOpacity 
+                          onPress={() => setSelectedSize(item.id)} 
+                          style={[
+                            styles.sizeBtn,
+                            { backgroundColor: selectedSize === item.id ? '#8B4513' : '#f0f0f0' }
+                          ]}
+                        >
+                          <Text style={{
+                            color: 'white', 
+                            fontWeight: 'bold', 
+                            fontSize: item.markerSize,
+                            includeFontPadding: false,
+                            textAlign: 'center'
+                          }}>
+                            {item.icon}
+                          </Text>
+                        </TouchableOpacity>
+                        <Text style={{marginTop: 8, fontWeight: 'bold', color: '#333', fontSize: 12}}>{item.shortLabel}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <TouchableOpacity style={styles.mainReportBtnCompact} onPress={reportPoop}>
+                    <Text style={styles.mainReportBtnText}>MELDUNG ABSENDEN</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           )}
         </View>
@@ -1267,11 +1284,6 @@ export default function App() {
               </TouchableOpacity>
             </View>
           )}
-
-          <View style={[styles.rankingCard, styles.shadow]}>
-            <Text style={styles.rankLabel}>🏆 DEUTSCHLANDWEIT</Text>
-            <Text style={styles.rankNumber}>#{stats.rank}</Text>
-          </View>
 
           <View style={[styles.levelCard, styles.shadow]}>
              <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1467,20 +1479,27 @@ export default function App() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FA' },
   shadow: { elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-  header: { paddingTop: 60, paddingHorizontal: 20, paddingBottom: 15, flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'white' },
-  xpTitle: { fontSize: 10, color: '#999', fontWeight: 'bold' },
-  xpValue: { fontSize: 18, fontWeight: 'bold', color: '#8B4513' },
+  header: { paddingTop: 18, paddingHorizontal: 18, paddingBottom: 8, flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'white', minHeight: 54 },
+  xpTitle: { fontSize: 9, color: '#999', fontWeight: 'bold', letterSpacing: 0.8 },
+  xpValue: { fontSize: 15, fontWeight: 'bold', color: '#8B4513' },
   headerProfileBtn: { backgroundColor: '#FDF5E6', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: '#DEB887' },
   headerProfileBtnText: { color: '#8B4513', fontWeight: 'bold', fontSize: 12 },
   adContainer: { backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', paddingVertical: 6, borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#EEE' },
   map: { flex: 1 },
-  overlay: { position: 'absolute', bottom: 18, left: 20, right: 20, backgroundColor: 'white', borderRadius: 24, padding: 18 },
-  overlayLabel: { textAlign: 'center', color: '#999', marginBottom: 12, fontSize: 11, fontWeight: 'bold', letterSpacing: 1 },
-  sizeRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 18 },
+  overlay: { position: 'absolute', bottom: 18, left: 20, right: 20, backgroundColor: 'white', borderRadius: 24, paddingHorizontal: 18, paddingTop: 10, paddingBottom: 14, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 8 },
+  overlayExpanded: { paddingBottom: 14 },
+  overlayCollapsed: { paddingBottom: 10 },
+  overlayToggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 4 },
+  overlayLabel: { textAlign: 'center', color: '#999', fontSize: 11, fontWeight: 'bold', letterSpacing: 1 },
+  overlayToggleSymbol: { marginLeft: 8, color: '#8B4513', fontSize: 16, fontWeight: 'bold' },
+  successToast: { position: 'absolute', left: 24, right: 24, bottom: 110, backgroundColor: '#1E1E1E', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 6 },
+  successToastText: { color: 'white', fontSize: 14, fontWeight: '700', textAlign: 'center' },
+  sizeRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 14, marginTop: 8 },
   sizeBtn: { width: 58, height: 58, backgroundColor: '#f0f0f0', borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginHorizontal: 10 },
   sizeBtnActive: { backgroundColor: '#8B4513' },
   mainReportBtn: { height: 54, backgroundColor: '#FF4136', borderRadius: 15, justifyContent: 'center', alignItems: 'center' },
-  mainReportBtnText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  mainReportBtnCompact: { height: 46, backgroundColor: '#FF4136', borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  mainReportBtnText: { color: 'white', fontWeight: 'bold', fontSize: 15 },
   navbar: { flexDirection: 'row', height: 95, backgroundColor: 'white', borderTopWidth: 1, borderColor: '#EEE', paddingBottom: 30, paddingTop: 10 },
   navItem: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   navText: { fontSize: 11, fontWeight: 'bold', marginTop: 4 },
