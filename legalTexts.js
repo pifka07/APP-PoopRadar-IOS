@@ -104,15 +104,17 @@ Berichtigung falscher Daten
 Löschung deiner Daten
 Einschränkung der Verarbeitung
 Datenübertragbarkeit
-10. Sicherheit
+10. Sicherheit und Kontolöschung
 
 Wir setzen technische und organisatorische Maßnahmen ein, um deine Daten vor Verlust, Missbrauch oder unbefugtem Zugriff zu schützen.
+
+Du kannst dein Konto jederzeit über den Link „Account löschen“ im Datenschutz-Dialog selbstständig löschen. In diesem Fall werden deine personenbezogenen Daten gelöscht, soweit keine gesetzlichen Aufbewahrungspflichten bestehen.
 
 11. Änderungen
 
 Diese Datenschutzerklärung kann bei Bedarf angepasst werden.
 
-11. Kontakt
+12. Kontakt
 
 Bei Fragen zum Datenschutz:
 

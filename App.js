@@ -1030,14 +1030,30 @@ export default function App() {
     };
     setMarkers(prevMarkers => [...prevMarkers, tempMarker]);
 
-    const { error: reportError } = await supabase.from('reports').insert([{ 
-      latitude: location.latitude,  // volle Namen nutzen!
-      longitude: location.longitude, 
-      size: selectedSize, 
-      city: currentCity
-    }]);
+    const { data: insertedRows, error: reportError } = await supabase
+      .from('reports')
+      .insert([{ 
+        latitude: location.latitude,
+        longitude: location.longitude,
+        size: selectedSize,
+        city: currentCity
+      }])
+      .select();
 
     if (!reportError) {
+      const storedReport = insertedRows?.[0] || { ...tempMarker, id: tempMarker.id };
+      setMarkers(prevMarkers => [
+        ...prevMarkers.filter(m => m.id !== tempMarker.id),
+        {
+          ...storedReport,
+          latitude: storedReport.latitude ?? location.latitude,
+          longitude: storedReport.longitude ?? location.longitude,
+          size: storedReport.size ?? selectedSize,
+          city: storedReport.city ?? currentCity,
+          created_at: storedReport.created_at ?? tempMarker.created_at,
+        }
+      ]);
+
       const normalizedType = getNormalizedReportType(selectedSize);
       const reportPoints = normalizedType === 'POOP' ? 10 : normalizedType === 'BIN_BAGS' ? 5 : normalizedType === 'POISON' ? 15 : 0;
 
@@ -1376,13 +1392,13 @@ export default function App() {
           )}
 
           <View style={[styles.rankHighlightCard, styles.shadow]}>
-            <View style={[styles.rankHighlightBadge, { backgroundColor: currentBadgeMeta.soft }]}>
-              <Text style={styles.rankHighlightBadgeIcon}>{currentBadgeMeta.icon}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.rankHighlightLabel}>Aktuell erreichter Rang</Text>
-              <Text style={styles.rankHighlightTitle}>{currentBadgeMeta.title}</Text>
-              <Text style={styles.rankHighlightSubtitle}>{currentBadgeMeta.subtitle}</Text>
+            <View style={styles.rankHighlightMainRow}>
+              <View style={styles.rankHighlightBadgeWrap}>
+                <Text style={styles.rankHighlightBadgeIcon}>{currentBadgeMeta.icon}</Text>
+              </View>
+              <View style={styles.rankHighlightTextWrap}>
+                <Text style={styles.rankHighlightTitle}>{currentBadgeMeta.title}</Text>
+              </View>
             </View>
           </View>
 
@@ -1575,9 +1591,9 @@ export default function App() {
                   setLegalVisible(false);
                   deleteAccount();
                 }}
-                style={{backgroundColor:'#d9534f', padding:12, borderRadius:12, marginTop:10}}
+                style={{marginTop:12, alignSelf:'flex-start'}}
               >
-                <Text style={{color:'white', fontWeight:'bold', textAlign:'center', fontSize:16}}>ACCOUNT LÖSCHEN</Text>
+                <Text style={{color:'#8B4513', fontWeight:'600', textDecorationLine:'underline', fontSize:15}}>Account löschen</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity onPress={() => setLegalVisible(false)} style={{backgroundColor:'#8B4513', padding:12, borderRadius:12, marginTop:15}}>
@@ -1631,12 +1647,12 @@ const styles = StyleSheet.create({
   levelCard: { backgroundColor: 'white', borderRadius: 20, padding: 20, marginBottom: 25 },
   progressBar: { height: 10, backgroundColor: '#F0F0F0', borderRadius: 5, marginTop: 15, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: '#FF7F50' },
-  rankHighlightCard: { backgroundColor: 'white', borderRadius: 20, padding: 18, marginBottom: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#E8E8EA' },
-  rankHighlightBadge: { width: 64, height: 64, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  rankHighlightBadgeIcon: { fontSize: 30 },
-  rankHighlightLabel: { fontSize: 11, color: '#999', fontWeight: 'bold', letterSpacing: 0.5, marginBottom: 4 },
-  rankHighlightTitle: { fontSize: 22, fontWeight: 'bold', color: '#333' },
-  rankHighlightSubtitle: { fontSize: 12, color: '#666', marginTop: 3 },
+  rankHighlightCard: { backgroundColor: '#F7A06B', borderRadius: 32, paddingVertical: 18, paddingHorizontal: 20, marginBottom: 20, borderWidth: 2, borderColor: '#F7A06B', alignItems: 'center', justifyContent: 'center' },
+  rankHighlightMainRow: { width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  rankHighlightBadgeWrap: { width: 72, height: 72, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.22)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.4)' },
+  rankHighlightBadgeIcon: { fontSize: 34 },
+  rankHighlightTextWrap: { flex: 1, alignItems: 'center' },
+  rankHighlightTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff', textAlign: 'center' },
   pointsInfoCard: { backgroundColor: 'white', borderRadius: 20, padding: 16, marginBottom: 25, borderWidth: 1, borderColor: '#E8E8EA' },
   pointsInfoTitle: { fontSize: 14, fontWeight: 'bold', color: '#333', marginBottom: 12 },
   pointsInfoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
