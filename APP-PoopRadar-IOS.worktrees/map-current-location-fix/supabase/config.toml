@@ -1,0 +1,4 @@
+project_id = "jpzkqatezxnbawcsvgux"
+
+[functions.notify-nearby-users]
+verify_jwt = false

@@ -12,16 +12,8 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
+import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { datenschutzText, impressumText } from './legalTexts';
-
-let BannerAd = null;
-let BannerAdSize = null;
-
-if (Platform.OS !== 'web') {
-  const GoogleMobileAds = require('react-native-google-mobile-ads');
-  BannerAd = GoogleMobileAds.BannerAd;
-  BannerAdSize = GoogleMobileAds.BannerAdSize;
-}
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -46,12 +38,6 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 const REPORT_VIBRATION_STORAGE_KEY = 'reportFeedback.vibrationEnabled';
 const REPORT_SOUND_STORAGE_KEY = 'reportFeedback.soundEnabled';
-const DEFAULT_MAP_REGION = {
-  latitude: 49.293,
-  longitude: 8.684,
-  latitudeDelta: 0.05,
-  longitudeDelta: 0.05,
-};
 
 const REPORT_TYPE_OPTIONS = [
   {
@@ -113,18 +99,12 @@ const isReportExpired = (report, nowMs = Date.now()) => {
   return nowMs - createdAtMs > expiryDays * 24 * 60 * 60 * 1000;
 };
 
-const isOwnReport = (report, userId) => {
-  if (!report?.user_id || !userId) return false;
-  return String(report.user_id) === String(userId);
-};
-
 export default function App() {
   const [session, setSession] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showAuth, setShowAuth] = useState(false);
   const [location, setLocation] = useState(null);
-  const [mapRegion, setMapRegion] = useState(DEFAULT_MAP_REGION);
   const [currentCity, setCurrentCity] = useState("Ortung...");
   const [markers, setMarkers] = useState([]);
   const [cityStats, setCityStats] = useState([]);
@@ -227,28 +207,6 @@ export default function App() {
         .eq('id', sess.user.id);
     } catch (e) {
       console.log('Standort-Update fehlgeschlagen:', e);
-    }
-  };
-
-  const isLocationFresh = (loc) => {
-    if (!loc?.timestamp) return false;
-    return Date.now() - loc.timestamp <= 180000;
-  };
-
-  const updateMapRegion = (coords, animate = true) => {
-    if (!coords || Number.isNaN(coords.latitude) || Number.isNaN(coords.longitude)) return;
-
-    const nextRegion = {
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    };
-
-    setMapRegion(nextRegion);
-
-    if (animate && mapRef.current) {
-      mapRef.current.animateToRegion(nextRegion, 700);
     }
   };
 
@@ -397,37 +355,19 @@ export default function App() {
     }
   };
 
-  const getBadgeMetaForPoints = (points = 0, cleanCount = 0) => {
-    const badgeDefinitions = [
-      { id: 'starter', minPoints: 0, title: 'Neuling', subtitle: 'Noch kein Rang erreicht', icon: '🌱', accent: '#A0A0A0', soft: '#F1F1F1' },
-      { id: 'spurenleser', minPoints: 100, title: 'Spurenleser', subtitle: 'Erste Spuren im Revier', icon: '🔎', accent: '#B67A3C', soft: '#F7E8D8' },
-      { id: 'pfadfinder', minPoints: 500, title: 'Pfadfinder', subtitle: 'Orientierung im Viertel', icon: '🧭', accent: '#7B8EA4', soft: '#E7EFF8' },
-      { id: 'sauberkeits-waechter', minPoints: 1000, title: 'Sauberkeits-Wächter', subtitle: 'Saubere Nachbarschaft', icon: '🛡️', accent: '#3D9E60', soft: '#E3F7EA' },
-      { id: 'stadtheld', minPoints: 5000, title: 'Stadtheld', subtitle: 'Großer lokaler Beitrag', icon: '🏙️', accent: '#5F7CC8', soft: '#EAF0FF' },
-      { id: 'community-champion', minPoints: 10000, title: 'Community-Champion', subtitle: 'Herausragender Einsatz', icon: '🏆', accent: '#D7A82E', soft: '#FFF3C7' },
-      { id: 'umwelt-ikone', minPoints: 10000, title: 'Umwelt-Ikone', subtitle: 'Saubere Grünflächen', icon: '🌿', accent: '#39A86C', soft: '#E3F7EC' },
-    ];
-
-    if (points >= 10000) {
-      return (cleanCount >= 25)
-        ? badgeDefinitions.find((badge) => badge.id === 'umwelt-ikone') || badgeDefinitions[badgeDefinitions.length - 1]
-        : badgeDefinitions.find((badge) => badge.id === 'community-champion') || badgeDefinitions[badgeDefinitions.length - 1];
-    }
-
-    const unlocked = badgeDefinitions.filter((badge) => points >= badge.minPoints);
-    return unlocked[unlocked.length - 1] || badgeDefinitions[0];
-  };
-
   const badgeDefinitions = [
-    { id: 'spurenleser', title: 'Spurenleser', subtitle: 'Ab 100 Punkte', icon: '🔎', achieved: stats.points >= 100, accent: '#B67A3C', soft: '#F7E8D8' },
-    { id: 'pfadfinder', title: 'Pfadfinder', subtitle: 'Ab 500 Punkte', icon: '🧭', achieved: stats.points >= 500, accent: '#7B8EA4', soft: '#E7EFF8' },
-    { id: 'sauberkeits-waechter', title: 'Sauberkeits-Wächter', subtitle: 'Ab 1.000 Punkte', icon: '🛡️', achieved: stats.points >= 1000, accent: '#3D9E60', soft: '#E3F7EA' },
-    { id: 'stadtheld', title: 'Stadtheld', subtitle: 'Ab 5.000 Punkte', icon: '🏙️', achieved: stats.points >= 5000, accent: '#5F7CC8', soft: '#EAF0FF' },
-    { id: 'community-champion', title: 'Community-Champion', subtitle: 'Ab 10.000 Punkte', icon: '🏆', achieved: stats.points >= 10000, accent: '#D7A82E', soft: '#FFF3C7' },
-    { id: 'umwelt-ikone', title: 'Umwelt-Ikone', subtitle: 'Alternatives End-Badge', icon: '🌿', achieved: stats.points >= 10000 && stats.clean >= 25, accent: '#39A86C', soft: '#E3F7EC' },
+    { id: 'first-fund', title: 'Erster Haufen', subtitle: 'Ersten Haufen markiert', icon: '🎉', achieved: stats.total >= 1, accent: '#B58145', soft: '#F8ECDE' },
+    { id: 'beginner', title: 'Anfaenger', subtitle: '50 Haufen-XP erreicht', icon: '⭐', achieved: stats.points >= 50, accent: '#E09B22', soft: '#FFF2DA' },
+    { id: 'advanced', title: 'Fortgeschritten', subtitle: '200 Haufen-XP erreicht', icon: '🚀', achieved: stats.points >= 200, accent: '#C67C1F', soft: '#FEEBD5' },
+    { id: 'expert', title: 'Experte', subtitle: '500 Haufen-XP erreicht', icon: '🏆', achieved: stats.points >= 500, accent: '#9A5B16', soft: '#F9E7D2' },
+    { id: 'cleaner', title: 'Saubermann', subtitle: 'Erste Meldung entfernt', icon: '🧹', achieved: stats.clean >= 1, accent: '#3F9C66', soft: '#E2F4EA' },
+    { id: 'hero', title: 'Held', subtitle: '25 Meldungen entfernt', icon: '🦸', achieved: stats.clean >= 25, accent: '#2C8D5A', soft: '#D9F0E4' },
+    { id: 'bags-scout', title: 'Tüten-Scout', subtitle: 'Ersten Mülleimer/Tüten-Spender gemeldet', icon: '🗑️', achieved: stats.bins >= 1, accent: '#2F7D7A', soft: '#E0F1F0' },
+    { id: 'poison-watch', title: 'Giftwarner', subtitle: 'Ersten Giftköder gemeldet', icon: '⚠️', achieved: stats.poison >= 1, accent: '#A4475D', soft: '#F7E4EA' },
+    { id: 'collector', title: 'Sammler', subtitle: 'Haufen, Tüten und Giftköder gemeldet', icon: '🎯', achieved: stats.sizeTypes >= 3, accent: '#6D4BAE', soft: '#EFE8FA' },
+    { id: 'globetrotter', title: 'Weltenbummler', subtitle: 'In 10 verschiedenen Städten gemeldet', icon: '🌍', achieved: stats.cityCount >= 10, accent: '#2F6EA3', soft: '#E1EDF8' },
+    { id: 'legend', title: 'Legende', subtitle: '1000 Haufen-XP erreicht', icon: '👑', achieved: stats.points >= 1000, accent: '#8D5B2A', soft: '#F9E9D8' },
   ];
-
-  const currentBadgeMeta = getBadgeMetaForPoints(stats.points, stats.clean);
 
   const mapRef = useRef(null);
   const pendingRegionRef = useRef(null);
@@ -587,19 +527,16 @@ export default function App() {
       }
 
       if (data) {
-        const points = data.points || 0;
-        const currentBadge = getBadgeMetaForPoints(points, data.clean_count || 0);
-
         setStats({
-          points,
+          points: data.points || 0,
           total: data.total_reports || 0,
           clean: data.clean_count || 0,
           poison: poisonCount,
           bins: binsCount,
           cityCount,
           sizeTypes,
-          level: Math.floor((points || 0) / 100) + 1,
-          levelName: currentBadge.title,
+          level: Math.floor((data.points || 0) / 100) + 1,
+          levelName: (data.points || 0) > 500 ? "Haufen-Hunter" : "Gehweg-Novize",
           rank: (higherRanked || 0) + 1,
           userCount: totalUsers || 1
         });
@@ -662,7 +599,6 @@ export default function App() {
       const currentLoc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       setLocation(currentLoc.coords);
       locationRef.current = currentLoc.coords;
-      updateMapRegion(currentLoc.coords, true);
       try {
         let rev = await Location.reverseGeocodeAsync(currentLoc.coords);
         if (rev[0]?.city) {
@@ -680,7 +616,6 @@ export default function App() {
         async (loc) => {
           setLocation(loc.coords);
           locationRef.current = loc.coords;
-          updateMapRegion(loc.coords, true);
           try {
             let rev = await Location.reverseGeocodeAsync(loc.coords);
             if (rev[0]?.city) {
@@ -720,7 +655,7 @@ export default function App() {
 
   const checkNearbyReports = async () => {
     const currentLocation = locationRef.current || location;
-    if (!currentLocation || !isLocationFresh(currentLocation)) return;
+    if (!currentLocation) return;
     if (notificationStatusRef.current !== 'granted') {
       console.log('Push-Check uebersprungen: Notification-Berechtigung nicht erteilt.');
       return;
@@ -751,13 +686,10 @@ export default function App() {
 
   const processReportForNotification = async (report) => {
     const currentLocation = locationRef.current || location;
-    if (!currentLocation || !isLocationFresh(currentLocation) || !report?.id) return;
+    if (!currentLocation || !report?.id) return;
     if (notificationStatusRef.current !== 'granted') return;
     if (notifiedReportIds.current.has(report.id)) return;
     if (isReportExpired(report)) return;
-
-    const currentUserId = sessionRef.current?.user?.id || session?.user?.id;
-    if (isOwnReport(report, currentUserId)) return;
 
     const normalizedType = getNormalizedReportType(report.size);
     if (normalizedType === 'BIN_BAGS') return;
@@ -830,14 +762,11 @@ export default function App() {
       setCityStats(sorted);
 
       const effectiveLocation = passedLocation || locationRef.current || location;
-      if (!startupNearbyInfoShown.current && effectiveLocation && isLocationFresh(effectiveLocation)) {
+      if (!startupNearbyInfoShown.current && effectiveLocation) {
         const nearbyPoop = [];
         const nearbyPoison = [];
-        const currentUserId = sessionRef.current?.user?.id || session?.user?.id;
 
         visibleReports.forEach((report) => {
-          if (isOwnReport(report, currentUserId)) return;
-
           const normalizedType = getNormalizedReportType(report.size);
           if (normalizedType === 'BIN_BAGS') return;
 
@@ -942,17 +871,13 @@ export default function App() {
         .filter((item) => item.publish_in_list === true)
         .sort((a, b) => (b.points || 0) - (a.points || 0) || (b.total_reports || 0) - (a.total_reports || 0))
         .slice(0, 20)
-        .map((item, index) => {
-          const badge = getBadgeMetaForPoints(item.points || 0, item.clean_count || 0);
-          return {
-            id: item.id,
-            rank: index + 1,
-            nickname: item.nickname || item.display_name || `User ${index + 1}`,
-            points: item.points || 0,
-            totalReports: item.total_reports || 0,
-            badge,
-          };
-        });
+        .map((item, index) => ({
+          id: item.id,
+          rank: index + 1,
+          nickname: item.nickname || item.display_name || `User ${index + 1}`,
+          points: item.points || 0,
+          totalReports: item.total_reports || 0,
+        }));
 
       setLeaderboard(leaderboardItems);
     } catch (error) {
@@ -1039,36 +964,27 @@ export default function App() {
 
     if (!reportError) {
       const normalizedType = getNormalizedReportType(selectedSize);
-      const reportPoints = normalizedType === 'POOP' ? 10 : normalizedType === 'BIN_BAGS' ? 5 : normalizedType === 'POISON' ? 15 : 0;
+      const isPoopReport = normalizedType === 'POOP';
+      const reportPoints = isPoopReport ? 10 : 0;
 
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('points, total_reports')
-        .eq('id', session.user.id)
-        .single();
-
-      if (!profileError && profileData) {
-        const nextPoints = (profileData.points || 0) + reportPoints;
-        const nextTotalReports = (profileData.total_reports || 0) + 1;
-
-        await supabase
-          .from('profiles')
-          .update({ 
-            points: nextPoints,
-            total_reports: nextTotalReports,
-          })
-          .eq('id', session.user.id);
+      if (isPoopReport) {
+        supabase.from('profiles').update({ 
+          points: stats.points + reportPoints, 
+          total_reports: stats.total + 1 
+        }).eq('id', session.user.id).then(() => {
+          updateProfileData(session);
+        });
+      } else {
+        updateProfileData(session);
       }
 
-      await updateProfileData(session);
-
       const typeMeta = getReportTypeMeta(selectedSize);
-      const successMessage = `${typeMeta.label} wurde gemeldet! +${reportPoints} XP`;
+      const successMessage = `${typeMeta.label} wurde gemeldet!${isPoopReport ? ` +${reportPoints} XP` : ''}`;
       setReportSuccessMessage(successMessage);
       setShowReportSuccessToast(true);
       setTimeout(() => {
         setShowReportSuccessToast(false);
-      }, 4000);
+      }, 2000);
     } else {
       setMarkers(prevMarkers => prevMarkers.filter(m => m.id !== tempMarker.id));
       console.log(reportError);
@@ -1086,21 +1002,13 @@ export default function App() {
     if (!deleteError) {
         const rewardPoints = 25;
 
-        const { data: profileData, error: profileError } = await supabase
+        await supabase
           .from('profiles')
-          .select('points, clean_count')
-          .eq('id', session.user.id)
-          .single();
-
-        if (!profileError && profileData) {
-          await supabase
-            .from('profiles')
-            .update({ 
-              points: (profileData.points || 0) + rewardPoints,
-              clean_count: (profileData.clean_count || 0) + 1,
-            })
-            .eq('id', session.user.id);
-        }
+          .update({ 
+            points: stats.points + rewardPoints, 
+            clean_count: stats.clean + 1 
+          })
+          .eq('id', session.user.id);
         
         setSelectedPoop(null);
         if (reportVibrationEnabled) {
@@ -1123,20 +1031,18 @@ export default function App() {
 
       {activeTab === 'Radar' && (
         <View style={{ flex: 1 }}>
-          {BannerAd && BannerAdSize && (
-            <View style={[styles.adContainer, styles.shadow]}>
-              <BannerAd
-                size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-                unitId={Platform.OS === 'android'
-                  ? 'ca-app-pub-2590841526378095/9563401535'
-                  : 'ca-app-pub-3940256099942544/2934735716'}
-                requestOptions={{
-                  requestNonPersonalizedAdsOnly: false,
-                }}
-                onAdFailedToLoad={(error) => console.log('AdMob Fehler:', error)}
-              />
-            </View>
-          )}
+          <View style={[styles.adContainer, styles.shadow]}>
+            <BannerAd
+              size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+              unitId={Platform.OS === 'android'
+                ? 'ca-app-pub-2590841526378095/9563401535'
+                : 'ca-app-pub-3940256099942544/2934735716'}
+              requestOptions={{
+                requestNonPersonalizedAdsOnly: false,
+              }}
+              onAdFailedToLoad={(error) => console.log('AdMob Fehler:', error)}
+            />
+          </View>
 
           <View style={{ flex: 1 }}>
             <MapView 
@@ -1146,18 +1052,25 @@ export default function App() {
               loadingIndicatorColor="#8B4513"
               mapType="standard"
               onMapReady={() => {
-                if (mapRegion && mapRef.current) {
-                  mapRef.current.animateToRegion(mapRegion, 1000);
-                }
                 if (pendingRegionRef.current && mapRef.current) {
                   mapRef.current.animateToRegion(pendingRegionRef.current, 1000);
                   pendingRegionRef.current = null;
                 }
               }}
               style={styles.map} 
-              showsUserLocation
-              followsUserLocation={true}
-              region={mapRegion}
+              showsUserLocation 
+              followsUserLocation={false} 
+              initialRegion={location ? { 
+                latitude: location.latitude, 
+                longitude: location.longitude, 
+                latitudeDelta: 0.005, 
+                longitudeDelta: 0.005 
+              } : {
+                latitude: 49.293, 
+                longitude: 8.684,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05
+              }}
             > 
             {(markers.filter((marker) => getNormalizedReportType(marker.size) === 'POOP')).map((marker, index) => {
               const markerKey = marker.id ? marker.id.toString() : `temp-${index}`;
@@ -1304,12 +1217,9 @@ export default function App() {
             renderItem={({ item }) => (
               <View style={[styles.scoreItem, styles.shadow]}>
                 <Text style={styles.scoreRank}>#{item.rank}</Text>
-                <View style={styles.leaderboardBadgeMini}>
-                  <Text style={styles.leaderboardBadgeMiniIcon}>{item.badge?.icon || '🏅'}</Text>
-                </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.nickname}</Text>
-                  <Text style={{ color: '#666', marginTop: 4 }}>{item.badge?.title || 'Neuling'} • {item.totalReports} Meldungen • {item.points} XP</Text>
+                  <Text style={{ color: '#666', marginTop: 4 }}>{item.totalReports} Meldungen • {item.points} XP</Text>
                 </View>
               </View>
             )}
@@ -1375,35 +1285,17 @@ export default function App() {
             </View>
           )}
 
-          <View style={[styles.rankHighlightCard, styles.shadow]}>
-            <View style={[styles.rankHighlightBadge, { backgroundColor: currentBadgeMeta.soft }]}>
-              <Text style={styles.rankHighlightBadgeIcon}>{currentBadgeMeta.icon}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.rankHighlightLabel}>Aktuell erreichter Rang</Text>
-              <Text style={styles.rankHighlightTitle}>{currentBadgeMeta.title}</Text>
-              <Text style={styles.rankHighlightSubtitle}>{currentBadgeMeta.subtitle}</Text>
-            </View>
-          </View>
-
-          <View style={[styles.pointsInfoCard, styles.shadow]}>
-            <Text style={styles.pointsInfoTitle}>Punkte pro Meldung</Text>
-            <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>💩 Haufen</Text>
-              <Text style={styles.pointsInfoValue}>+10 XP</Text>
-            </View>
-            <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>🗑️ Tüten</Text>
-              <Text style={styles.pointsInfoValue}>+5 XP</Text>
-            </View>
-            <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>⚠️ Giftköder</Text>
-              <Text style={styles.pointsInfoValue}>+15 XP</Text>
-            </View>
-            <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>🧹 Aufräumen</Text>
-              <Text style={styles.pointsInfoValue}>+25 XP</Text>
-            </View>
+          <View style={[styles.levelCard, styles.shadow]}>
+             <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Text style={{fontSize: 35, marginRight: 15}}>👶</Text>
+                <View>
+                  <Text style={{fontSize: 11, color: '#999', fontWeight: 'bold'}}>LEVEL {stats.level}</Text>
+                  <Text style={{fontSize: 18, fontWeight: 'bold', color: '#333'}}>{stats.levelName}</Text>
+                </View>
+             </View>
+             <View style={styles.progressBar}>
+                <View style={[styles.progressFill, {width: `${stats.points % 100}%`}]} />
+             </View>
           </View>
 
           <View style={styles.statsGrid}>
@@ -1522,6 +1414,11 @@ export default function App() {
             <TouchableOpacity onPress={() => openLegal('Datenschutz & Impressum', datenschutzText)} style={{marginBottom: 10}}>
               <Text style={styles.footerLink}>Datenschutz & Impressum</Text>
             </TouchableOpacity>
+            {session && (
+              <TouchableOpacity onPress={deleteAccount} style={[styles.authMainTrigger, {backgroundColor: '#d9534f', marginBottom: 10}]}> 
+                <Text style={styles.authMainTriggerText}>ACCOUNT LÖSCHEN</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity 
               onPress={() => session ? supabase.auth.signOut() : setShowAuth(true)} 
               style={[styles.authMainTrigger, {backgroundColor: session ? '#555' : '#8B4513'}]}
@@ -1569,17 +1466,6 @@ export default function App() {
             <ScrollView style={{marginVertical:15, maxHeight:500}}>
               <Text style={{fontSize:14, lineHeight:22, color:'#333'}}>{legalContent.text}</Text>
             </ScrollView>
-            {session && (
-              <TouchableOpacity
-                onPress={() => {
-                  setLegalVisible(false);
-                  deleteAccount();
-                }}
-                style={{backgroundColor:'#d9534f', padding:12, borderRadius:12, marginTop:10}}
-              >
-                <Text style={{color:'white', fontWeight:'bold', textAlign:'center', fontSize:16}}>ACCOUNT LÖSCHEN</Text>
-              </TouchableOpacity>
-            )}
             <TouchableOpacity onPress={() => setLegalVisible(false)} style={{backgroundColor:'#8B4513', padding:12, borderRadius:12, marginTop:15}}>
               <Text style={{color:'white', fontWeight:'bold', textAlign:'center', fontSize:16}}>Schließen</Text>
             </TouchableOpacity>
@@ -1631,17 +1517,6 @@ const styles = StyleSheet.create({
   levelCard: { backgroundColor: 'white', borderRadius: 20, padding: 20, marginBottom: 25 },
   progressBar: { height: 10, backgroundColor: '#F0F0F0', borderRadius: 5, marginTop: 15, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: '#FF7F50' },
-  rankHighlightCard: { backgroundColor: 'white', borderRadius: 20, padding: 18, marginBottom: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#E8E8EA' },
-  rankHighlightBadge: { width: 64, height: 64, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 16 },
-  rankHighlightBadgeIcon: { fontSize: 30 },
-  rankHighlightLabel: { fontSize: 11, color: '#999', fontWeight: 'bold', letterSpacing: 0.5, marginBottom: 4 },
-  rankHighlightTitle: { fontSize: 22, fontWeight: 'bold', color: '#333' },
-  rankHighlightSubtitle: { fontSize: 12, color: '#666', marginTop: 3 },
-  pointsInfoCard: { backgroundColor: 'white', borderRadius: 20, padding: 16, marginBottom: 25, borderWidth: 1, borderColor: '#E8E8EA' },
-  pointsInfoTitle: { fontSize: 14, fontWeight: 'bold', color: '#333', marginBottom: 12 },
-  pointsInfoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
-  pointsInfoLabel: { fontSize: 13, color: '#555', fontWeight: '600' },
-  pointsInfoValue: { fontSize: 13, color: '#8B4513', fontWeight: 'bold' },
   statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30 },
   statBox: { backgroundColor: 'white', width: '31%', paddingVertical: 15, borderRadius: 18, alignItems: 'center' },
   statValue: { fontSize: 18, fontWeight: 'bold', marginTop: 5 },
