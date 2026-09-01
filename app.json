@@ -2,7 +2,7 @@
   "expo": {
     "name": "Poop Radar",
     "slug": "snack-35410476-aebc-43a0-809d-a39274281671",
-    "version": "1.3.4",
+    "version": "1.3.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

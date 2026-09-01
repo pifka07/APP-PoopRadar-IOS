@@ -2,7 +2,7 @@
 import 'react-native-url-polyfill/auto';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator, TextInput, Vibration, ScrollView, FlatList, Modal, Platform, KeyboardAvoidingView, Linking, Switch } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator, TextInput, Vibration, ScrollView, FlatList, Modal, Platform, KeyboardAvoidingView, Linking, Switch, Animated } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { createClient } from '@supabase/supabase-js';
@@ -12,7 +12,7 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Haptics from 'expo-haptics';
 import * as Notifications from 'expo-notifications';
-import { datenschutzText, impressumText } from './legalTexts';
+import { datenschutzText, datenschutzTextEn, impressumText, impressumTextEn } from './legalTexts';
 
 let BannerAd = null;
 let BannerAdSize = null;
@@ -46,6 +46,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 const REPORT_VIBRATION_STORAGE_KEY = 'reportFeedback.vibrationEnabled';
 const REPORT_SOUND_STORAGE_KEY = 'reportFeedback.soundEnabled';
+const LANGUAGE_STORAGE_KEY = 'app.language';
 const DEFAULT_MAP_REGION = {
   latitude: 49.293,
   longitude: 8.684,
@@ -53,53 +54,350 @@ const DEFAULT_MAP_REGION = {
   longitudeDelta: 0.05,
 };
 
-const REPORT_TYPE_OPTIONS = [
-  {
-    id: 'POOP',
-    label: 'Haufen',
-    shortLabel: 'Haufen',
-    icon: '💩',
-    markerSize: 26,
-    markerBg: '#FFE8CC',
-    markerBorder: '#C97818',
+const translations = {
+  de: {
+    radar: 'Radar',
+    score: 'Städte',
+    top: 'Top',
+    profile: 'Profil',
+    pro: 'PROFI',
+    guest: 'GAST',
+    guestMode: 'Gast-Modus',
+    locating: 'Ortung...',
+    loading: 'Radar lädt...',
+    // Auth
+    heroTitle: 'Haufen-Jäger',
+    email: 'E-Mail',
+    password: 'Passwort',
+    passwordHint: 'mindestens 6 Zeichen',
+    login: 'EINLOGGEN',
+    createAccount: 'Konto erstellen',
+    cancel: 'Abbrechen',
+    logout: 'AUSLOGGEN',
+    loginRegister: 'LOGIN / REGISTRIEREN',
+    signInForXp: 'Melde dich an für mehr XP',
+    signInRequired: 'Bitte erst anmelden!',
+    stop: 'Stop!',
+    wait: 'Warte...',
+    locationWaiting: 'Dein Standort wird noch präzisiert.',
+    error: 'Fehler',
+    // Reports
+    reportType: 'MELDETYP WÄHLEN',
+    submitReport: 'MELDUNG ABSENDEN',
+    reportPoop: 'Haufen',
+    reportPoopShort: 'Haufen',
+    reportBags: 'Mülleimer / Hunde-Tüten',
+    reportBagsShort: 'Tüten',
+    reportPoison: 'Giftköder',
+    reportPoisonShort: 'Giftköder',
+    reportTrash: 'Illegaler Müll',
+    reportTrashShort: 'Müll',
+    foundIn: 'Fund in',
+    type: 'Typ:',
+    cleaned: "ICH HAB'S WEGGERÄUMT ✅",
+    close: 'Schließen',
+    cleanTitle: 'Sauber!',
+    earnedXp: 'Du hast {points} XP verdient! 🧹',
+    reportedSuccess: 'wurde gemeldet!',
+    saveFailed: 'Speichern fehlgeschlagen',
+    entryNotSaved: 'Der Eintrag konnte nicht in der Datenbank gespeichert werden.',
+    // Score & Leaderboard
+    cityRanking: '🏆 City Ranking',
+    top30Cities: 'Top 30 Städte',
+    topReporters: '🥇 Top 20 Melder',
+    leaderboardNote: 'Nur Profile mit freigegebenen Nicknames',
+    noReporters: 'Noch keine freigegebenen Melder in der Bestenliste.',
+    reportsLabel: 'Meldungen',
+    // Profile
+    namePlaceholder: 'Dein Name',
+    leaderboardProfile: 'Profil für Bestenliste',
+    nicknamePlaceholder: 'Dein Nickname',
+    allowPublishing: 'Veröffentlichung erlauben',
+    publishingHint: 'Zeige deinen Nickname in der Top 20 Liste.',
+    save: 'Speichern',
+    pointsInfoTitle: 'Punkte pro Meldung',
+    cleanUp: 'Aufräumen',
+    points: 'PUNKTE',
+    reports: 'MELDUNGEN',
+    clean: 'CLEAN',
+    notifications: 'Benachrichtigungen',
+    notificationsOn: 'Benachrichtigungen sind aktiviert.',
+    notificationsOff: 'Benachrichtigungen sind deaktiviert.',
+    notificationsUnknown: 'Benachrichtigungsstatus unklar.',
+    pushToken: 'Push-Token',
+    openSettings: 'Einstellungen öffnen',
+    openSettingsManual: 'Bitte öffne die Benachrichtigungseinstellungen manuell.',
+    reportFeedback: 'Feedback beim Melden',
+    vibration: 'Vibration',
+    vibrationHint: 'Kurzes Vibrationssignal beim Haufen melden.',
+    sound: 'Signalton',
+    soundHint: 'Kurzer Ton beim erfolgreichen Tippen auf Melden.',
+    badgesTitle: 'BADGES & MELDETYPEN',
+    privacy: 'Datenschutz & Impressum',
+    language: 'Sprache',
+    // Badges
+    badgeStarterTitle: 'Neuling',
+    badgeStarterSub: 'Noch kein Rang erreicht',
+    badgeTrackerTitle: 'Spurenleser',
+    badgeTrackerSub: 'Erste Spuren im Revier',
+    badgePathfinderTitle: 'Pfadfinder',
+    badgePathfinderSub: 'Orientierung im Viertel',
+    badgeGuardianTitle: 'Sauberkeits-Wächter',
+    badgeGuardianSub: 'Saubere Nachbarschaft',
+    badgeHeroTitle: 'Stadtheld',
+    badgeHeroSub: 'Großer lokaler Beitrag',
+    badgeChampionTitle: 'Community-Champion',
+    badgeChampionSub: 'Herausragender Einsatz',
+    badgeEcoTitle: 'Umwelt-Ikone',
+    badgeEcoSub: 'Saubere Grünflächen',
+    badgeTrackerReq: 'Ab 100 Punkte',
+    badgePathfinderReq: 'Ab 500 Punkte',
+    badgeGuardianReq: 'Ab 1.000 Punkte',
+    badgeHeroReq: 'Ab 5.000 Punkte',
+    badgeChampionReq: 'Ab 10.000 Punkte',
+    badgeEcoReq: 'Alternatives End-Badge',
+    // Alerts / Delete account
+    deleteAccountTitle: 'Account löschen',
+    deleteAccountConfirm: 'Sind Sie sicher, dass Sie Ihren Account und alle Daten löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+    deleteBtn: 'Löschen',
+    deleteSuccessTitle: 'Account gelöscht',
+    deleteSuccessMsg: 'Ihr Account und alle Daten wurden erfolgreich gelöscht.',
+    deleteErrorMsg: 'Beim Löschen ist ein Fehler aufgetreten.',
+    profileSaveError: 'Profil-Einstellungen konnten nicht gespeichert werden.',
+    warning: 'Achtung',
+    nearbyPoopAlert: 'Pass auf deine Snicker auf. In 500m Naehe gefunden: {count} Haufen',
+    nearbyPoisonAlert: 'Achtung: {count} Giftköder',
+    nearbyTrashAlert: 'Achtung: {count} illegaler Müll in der Nähe',
+    startupCheckTitle: 'Umgebungscheck beim Start',
+    nearbyPoopNotifTitle: 'Haufen in der Nähe!',
+    nearbyPoisonNotifTitle: 'Giftköder Warnung!',
+    nearbyTrashNotifTitle: 'Illegaler Müll in der Nähe!',
   },
-  {
-    id: 'BIN_BAGS',
-    label: 'Mülleimer / Hunde-Tüten',
-    shortLabel: 'Tüten',
-    icon: '\u{1F6CD}\uFE0F',
-    markerSize: 22,
-    markerBg: '#D9F2FF',
-    markerBorder: '#0077B6',
+  en: {
+    radar: 'Radar',
+    score: 'Cities',
+    top: 'Top',
+    profile: 'Profile',
+    pro: 'PRO',
+    guest: 'GUEST',
+    guestMode: 'Guest Mode',
+    locating: 'Locating...',
+    loading: 'Loading radar...',
+    // Auth
+    heroTitle: 'Poop Hunter',
+    email: 'Email',
+    password: 'Password',
+    passwordHint: 'at least 6 characters',
+    login: 'LOG IN',
+    createAccount: 'Create account',
+    cancel: 'Cancel',
+    logout: 'LOG OUT',
+    loginRegister: 'LOG IN / REGISTER',
+    signInForXp: 'Sign in to earn more XP',
+    signInRequired: 'Please sign in first!',
+    stop: 'Stop!',
+    wait: 'Wait...',
+    locationWaiting: 'Your location is still being determined.',
+    error: 'Error',
+    // Reports
+    reportType: 'CHOOSE REPORT TYPE',
+    submitReport: 'SUBMIT REPORT',
+    reportPoop: 'Poop',
+    reportPoopShort: 'Poop',
+    reportBags: 'Bins / Dog waste bags',
+    reportBagsShort: 'Bags',
+    reportPoison: 'Poison bait',
+    reportPoisonShort: 'Poison',
+    reportTrash: 'Illegal dumping',
+    reportTrashShort: 'Trash',
+    foundIn: 'Found in',
+    type: 'Type:',
+    cleaned: "I'VE CLEANED IT UP ✅",
+    close: 'Close',
+    cleanTitle: 'Clean!',
+    earnedXp: 'You earned {points} XP! 🧹',
+    reportedSuccess: 'was reported!',
+    saveFailed: 'Could not save',
+    entryNotSaved: 'The entry could not be saved to the database.',
+    // Score & Leaderboard
+    cityRanking: '🏆 City Ranking',
+    top30Cities: 'Top 30 Cities',
+    topReporters: '🥇 Top 20 Reporters',
+    leaderboardNote: 'Only profiles with public nicknames',
+    noReporters: 'No public reporters on the leaderboard yet.',
+    reportsLabel: 'reports',
+    // Profile
+    namePlaceholder: 'Your name',
+    leaderboardProfile: 'Leaderboard profile',
+    nicknamePlaceholder: 'Your nickname',
+    allowPublishing: 'Allow publishing',
+    publishingHint: 'Show your nickname in the Top 20 list.',
+    save: 'Save',
+    pointsInfoTitle: 'Points per report',
+    cleanUp: 'Clean up',
+    points: 'POINTS',
+    reports: 'REPORTS',
+    clean: 'CLEAN',
+    notifications: 'Notifications',
+    notificationsOn: 'Notifications are enabled.',
+    notificationsOff: 'Notifications are disabled.',
+    notificationsUnknown: 'Notification status is unclear.',
+    pushToken: 'Push token',
+    openSettings: 'Open settings',
+    openSettingsManual: 'Please open notification settings manually.',
+    reportFeedback: 'Report feedback',
+    vibration: 'Vibration',
+    vibrationHint: 'Brief vibration when reporting poop.',
+    sound: 'Sound',
+    soundHint: 'Brief sound after successfully submitting a report.',
+    badgesTitle: 'BADGES & REPORT TYPES',
+    privacy: 'Privacy Policy & Legal Notice',
+    language: 'Language',
+    // Badges
+    badgeStarterTitle: 'Starter',
+    badgeStarterSub: 'No rank achieved yet',
+    badgeTrackerTitle: 'Tracker',
+    badgeTrackerSub: 'First traces in the area',
+    badgePathfinderTitle: 'Pathfinder',
+    badgePathfinderSub: 'Finding your way around',
+    badgeGuardianTitle: 'Cleanliness Guardian',
+    badgeGuardianSub: 'Clean neighborhood',
+    badgeHeroTitle: 'City Hero',
+    badgeHeroSub: 'Major local contribution',
+    badgeChampionTitle: 'Community Champion',
+    badgeChampionSub: 'Outstanding commitment',
+    badgeEcoTitle: 'Environmental Icon',
+    badgeEcoSub: 'Clean green spaces',
+    badgeTrackerReq: 'From 100 points',
+    badgePathfinderReq: 'From 500 points',
+    badgeGuardianReq: 'From 1,000 points',
+    badgeHeroReq: 'From 5,000 points',
+    badgeChampionReq: 'From 10,000 points',
+    badgeEcoReq: 'Alternative final badge',
+    // Alerts / Delete account
+    deleteAccountTitle: 'Delete account',
+    deleteAccountConfirm: 'Are you sure you want to delete your account and all data? This action cannot be undone.',
+    deleteBtn: 'Delete',
+    deleteSuccessTitle: 'Account deleted',
+    deleteSuccessMsg: 'Your account and all data have been successfully deleted.',
+    deleteErrorMsg: 'An error occurred while deleting your account.',
+    profileSaveError: 'Profile settings could not be saved.',
+    warning: 'Warning',
+    nearbyPoopAlert: 'Watch your step! Found {count} poop nearby within 500m',
+    nearbyPoisonAlert: 'Warning: {count} poison bait nearby',
+    nearbyTrashAlert: 'Warning: {count} illegal dumping nearby',
+    startupCheckTitle: 'Startup surroundings check',
+    nearbyPoopNotifTitle: 'Poop nearby!',
+    nearbyPoisonNotifTitle: 'Poison bait warning!',
+    nearbyTrashNotifTitle: 'Illegal dumping nearby!',
   },
-  {
-    id: 'POISON',
-    label: 'Giftköder',
-    shortLabel: 'Giftköder',
-    icon: '⚠️',
-    markerSize: 22,
-    markerBg: '#FFDDE6',
-    markerBorder: '#B4234D',
-  },
-];
+};
 
 const REPORT_TYPE_EXPIRY_DAYS = {
   POOP: 8,
   BIN_BAGS: null,
   POISON: 10,
+  TRASH: null,
 };
 
 const getNormalizedReportType = (rawType) => {
   if (!rawType) return 'POOP';
-  if (rawType === 'S' || rawType === 'M' || rawType === 'L') return 'POOP';
-  if (rawType === 'POOP' || rawType === 'BIN_BAGS' || rawType === 'POISON') return rawType;
+  const normalizedText = String(rawType)
+    .trim()
+    .toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Z0-9]/g, '');
+
+  if (normalizedText === 'S' || normalizedText === 'M' || normalizedText === 'L') return 'POOP';
+  if (normalizedText === 'POOP' || normalizedText === 'BINBAGS' || normalizedText === 'POISON' || normalizedText === 'TRASH') return normalizedText === 'BINBAGS' ? 'BIN_BAGS' : normalizedText;
+
+  const aliasMap = {
+    BINBAG: 'BIN_BAGS',
+    DOGBAG: 'BIN_BAGS',
+    DOGBAGS: 'BIN_BAGS',
+    TUETEN: 'BIN_BAGS',
+    TUTEN: 'BIN_BAGS',
+    MUELLEIMER: 'BIN_BAGS',
+    MUEHLEIMER: 'BIN_BAGS',
+    HUNDETUETEN: 'BIN_BAGS',
+    GIFT: 'POISON',
+    GIFTKOEDER: 'POISON',
+    GIFTKODER: 'POISON',
+    GIFTKÖDER: 'POISON',
+    TRASH: 'TRASH',
+    MUELL: 'TRASH',
+    MULL: 'TRASH',
+    ILLEGALMUELL: 'TRASH',
+    ILLEGALMULL: 'TRASH',
+    ILLEGALTRASH: 'TRASH',
+    ILLEGALDUMP: 'TRASH',
+    DUMPING: 'TRASH',
+    WASTE: 'TRASH',
+  };
+
+  if (aliasMap[normalizedText]) return aliasMap[normalizedText];
+  if (normalizedText.includes('GIFT') || normalizedText.includes('POISON')) return 'POISON';
+  if (normalizedText.includes('ILLEGAL') || normalizedText.includes('TRASH') || normalizedText.includes('WASTE')) return 'TRASH';
+  if (normalizedText.includes('BAG') || normalizedText.includes('TUETE') || normalizedText.includes('TUTEN') || normalizedText.includes('EIMER')) return 'BIN_BAGS';
+  if (normalizedText.includes('MUELL') || normalizedText.includes('MULL')) return 'TRASH';
+
   return 'POOP';
 };
 
-const getReportTypeMeta = (rawType) => {
+const getReportTypeMeta = (rawType, lang = 'de') => {
   const normalizedType = getNormalizedReportType(rawType);
-  return REPORT_TYPE_OPTIONS.find((option) => option.id === normalizedType) || REPORT_TYPE_OPTIONS[0];
+  const tLocal = translations[lang] || translations.de;
+  if (normalizedType === 'BIN_BAGS') {
+    return {
+      id: 'BIN_BAGS',
+      label: tLocal.reportBags,
+      shortLabel: tLocal.reportBagsShort,
+      icon: '\u{1F6CD}\uFE0F',
+      markerSize: 22,
+      markerBg: '#D9F2FF',
+      markerBorder: '#0077B6',
+    };
+  }
+  if (normalizedType === 'POISON') {
+    return {
+      id: 'POISON',
+      label: tLocal.reportPoison,
+      shortLabel: tLocal.reportPoisonShort,
+      icon: '⚠️',
+      markerSize: 22,
+      markerBg: '#FFDDE6',
+      markerBorder: '#B4234D',
+    };
+  }
+  if (normalizedType === 'TRASH') {
+    return {
+      id: 'TRASH',
+      label: tLocal.reportTrash,
+      shortLabel: tLocal.reportTrashShort,
+      icon: '🚫',
+      markerSize: 22,
+      markerBg: '#FFE0E0',
+      markerBorder: '#D32F2F',
+    };
+  }
+  return {
+    id: 'POOP',
+    label: tLocal.reportPoop,
+    shortLabel: tLocal.reportPoopShort,
+    icon: '💩',
+    markerSize: 26,
+    markerBg: '#FFE8CC',
+    markerBorder: '#C97818',
+  };
 };
+
+const getReportTypeOptions = (lang = 'de') => [
+  getReportTypeMeta('POOP', lang),
+  getReportTypeMeta('BIN_BAGS', lang),
+  getReportTypeMeta('POISON', lang),
+  getReportTypeMeta('TRASH', lang),
+];
 
 const isReportExpired = (report, nowMs = Date.now()) => {
   const normalizedType = getNormalizedReportType(report?.size);
@@ -119,6 +417,7 @@ const isOwnReport = (report, userId) => {
 };
 
 export default function App() {
+  const [language, setLanguage] = useState('de');
   const [session, setSession] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -153,6 +452,71 @@ export default function App() {
   const [pushTokenStatus, setPushTokenStatus] = useState('unbekannt');
   const [reportVibrationEnabled, setReportVibrationEnabled] = useState(true);
   const [reportSoundEnabled, setReportSoundEnabled] = useState(true);
+
+  const t = translations[language] || translations.de;
+  const switchAnim = useRef(new Animated.Value(language === 'en' ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(switchAnim, {
+      toValue: language === 'en' ? 1 : 0,
+      useNativeDriver: true,
+      friction: 6,
+      tension: 50,
+    }).start();
+  }, [language]);
+
+  const changeLanguage = async (nextLang) => {
+    if (nextLang === language) return;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (e) {}
+    setLanguage(nextLang);
+    await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLang);
+  };
+
+  const getBadgeMetaForPoints = (points = 0, cleanCount = 0, lang = language) => {
+    const tLocal = translations[lang] || translations.de;
+    const badgeDefinitions = [
+      { id: 'starter', minPoints: 0, title: tLocal.badgeStarterTitle, subtitle: tLocal.badgeStarterSub, icon: '🌱', accent: '#A0A0A0', soft: '#F1F1F1' },
+      { id: 'spurenleser', minPoints: 100, title: tLocal.badgeTrackerTitle, subtitle: tLocal.badgeTrackerSub, icon: '🔎', accent: '#B67A3C', soft: '#F7E8D8' },
+      { id: 'pfadfinder', minPoints: 500, title: tLocal.badgePathfinderTitle, subtitle: tLocal.badgePathfinderSub, icon: '🧭', accent: '#7B8EA4', soft: '#E7EFF8' },
+      { id: 'sauberkeits-waechter', minPoints: 1000, title: tLocal.badgeGuardianTitle, subtitle: tLocal.badgeGuardianSub, icon: '🛡️', accent: '#3D9E60', soft: '#E3F7EA' },
+      { id: 'stadtheld', minPoints: 5000, title: tLocal.badgeHeroTitle, subtitle: tLocal.badgeHeroSub, icon: '🏙️', accent: '#5F7CC8', soft: '#EAF0FF' },
+      { id: 'community-champion', minPoints: 10000, title: tLocal.badgeChampionTitle, subtitle: tLocal.badgeChampionSub, icon: '🏆', accent: '#D7A82E', soft: '#FFF3C7' },
+      { id: 'umwelt-ikone', minPoints: 10000, title: tLocal.badgeEcoTitle, subtitle: tLocal.badgeEcoSub, icon: '🌿', accent: '#39A86C', soft: '#E3F7EC' },
+    ];
+
+    if (points >= 10000) {
+      return (cleanCount >= 25)
+        ? badgeDefinitions.find((badge) => badge.id === 'umwelt-ikone') || badgeDefinitions[badgeDefinitions.length - 1]
+        : badgeDefinitions.find((badge) => badge.id === 'community-champion') || badgeDefinitions[badgeDefinitions.length - 1];
+    }
+
+    const unlocked = badgeDefinitions.filter((badge) => points >= badge.minPoints);
+    return unlocked[unlocked.length - 1] || badgeDefinitions[0];
+  };
+
+  const badgeDefinitions = [
+    { id: 'spurenleser', title: t.badgeTrackerTitle, subtitle: t.badgeTrackerReq, icon: '🔎', achieved: stats.points >= 100, accent: '#B67A3C', soft: '#F7E8D8' },
+    { id: 'pfadfinder', title: t.badgePathfinderTitle, subtitle: t.badgePathfinderReq, icon: '🧭', achieved: stats.points >= 500, accent: '#7B8EA4', soft: '#E7EFF8' },
+    { id: 'sauberkeits-waechter', title: t.badgeGuardianTitle, subtitle: t.badgeGuardianReq, icon: '🛡️', achieved: stats.points >= 1000, accent: '#3D9E60', soft: '#E3F7EA' },
+    { id: 'stadtheld', title: t.badgeHeroTitle, subtitle: t.badgeHeroReq, icon: '🏙️', achieved: stats.points >= 5000, accent: '#5F7CC8', soft: '#EAF0FF' },
+    { id: 'community-champion', title: t.badgeChampionTitle, subtitle: t.badgeChampionReq, icon: '🏆', achieved: stats.points >= 10000, accent: '#D7A82E', soft: '#FFF3C7' },
+    { id: 'umwelt-ikone', title: t.badgeEcoTitle, subtitle: t.badgeEcoReq, icon: '🌿', achieved: stats.points >= 10000 && stats.clean >= 25, accent: '#39A86C', soft: '#E3F7EC' },
+  ];
+
+  const currentBadgeMeta = getBadgeMetaForPoints(stats.points, stats.clean, language);
+
+  const mapRef = useRef(null);
+  const pendingRegionRef = useRef(null);
+  const locationWatcher = useRef(null);
+  const notifiedReportIds = useRef(new Set());
+  const startupNearbyInfoShown = useRef(false);
+  const locationRef = useRef(null);
+  const notificationStatusRef = useRef('unknown');
+  const lastMarkerSyncTimeRef = useRef(null);
+  const sessionRef = useRef(null);
+  const locationUpdateCounterRef = useRef(0);
 
   const registerPushToken = async (sess, attempt = 1) => {
     if (!sess?.user?.id) return;
@@ -302,7 +666,7 @@ export default function App() {
       await Linking.openSettings();
     } catch (error) {
       console.log('Konnte Einstellungen nicht öffnen:', error);
-      Alert.alert('Info', 'Bitte öffne die Benachrichtigungseinstellungen manuell.');
+      Alert.alert('Info', t.openSettingsManual);
     }
   };
 
@@ -311,6 +675,7 @@ export default function App() {
       const values = await AsyncStorage.multiGet([
         REPORT_VIBRATION_STORAGE_KEY,
         REPORT_SOUND_STORAGE_KEY,
+        LANGUAGE_STORAGE_KEY,
       ]);
       const storedValues = Object.fromEntries(values);
 
@@ -321,8 +686,12 @@ export default function App() {
       if (storedValues[REPORT_SOUND_STORAGE_KEY] !== null) {
         setReportSoundEnabled(JSON.parse(storedValues[REPORT_SOUND_STORAGE_KEY]));
       }
+
+      if (storedValues[LANGUAGE_STORAGE_KEY] && (storedValues[LANGUAGE_STORAGE_KEY] === 'de' || storedValues[LANGUAGE_STORAGE_KEY] === 'en')) {
+        setLanguage(storedValues[LANGUAGE_STORAGE_KEY]);
+      }
     } catch (error) {
-      console.log('Fehler beim Laden der Feedback-Einstellungen:', error);
+      console.log('Fehler beim Laden der Einstellungen:', error);
     }
   };
 
@@ -374,7 +743,6 @@ export default function App() {
         { volume: 0.4, shouldPlay: false }
       );
 
-      // Stelle sicher, dass die Audio-Session korrekt ist
       try {
         await Audio.setAudioModeAsync({
           playsInSilentModeIOS: true,
@@ -397,49 +765,6 @@ export default function App() {
     }
   };
 
-  const getBadgeMetaForPoints = (points = 0, cleanCount = 0) => {
-    const badgeDefinitions = [
-      { id: 'starter', minPoints: 0, title: 'Neuling', subtitle: 'Noch kein Rang erreicht', icon: '🌱', accent: '#A0A0A0', soft: '#F1F1F1' },
-      { id: 'spurenleser', minPoints: 100, title: 'Spurenleser', subtitle: 'Erste Spuren im Revier', icon: '🔎', accent: '#B67A3C', soft: '#F7E8D8' },
-      { id: 'pfadfinder', minPoints: 500, title: 'Pfadfinder', subtitle: 'Orientierung im Viertel', icon: '🧭', accent: '#7B8EA4', soft: '#E7EFF8' },
-      { id: 'sauberkeits-waechter', minPoints: 1000, title: 'Sauberkeits-Wächter', subtitle: 'Saubere Nachbarschaft', icon: '🛡️', accent: '#3D9E60', soft: '#E3F7EA' },
-      { id: 'stadtheld', minPoints: 5000, title: 'Stadtheld', subtitle: 'Großer lokaler Beitrag', icon: '🏙️', accent: '#5F7CC8', soft: '#EAF0FF' },
-      { id: 'community-champion', minPoints: 10000, title: 'Community-Champion', subtitle: 'Herausragender Einsatz', icon: '🏆', accent: '#D7A82E', soft: '#FFF3C7' },
-      { id: 'umwelt-ikone', minPoints: 10000, title: 'Umwelt-Ikone', subtitle: 'Saubere Grünflächen', icon: '🌿', accent: '#39A86C', soft: '#E3F7EC' },
-    ];
-
-    if (points >= 10000) {
-      return (cleanCount >= 25)
-        ? badgeDefinitions.find((badge) => badge.id === 'umwelt-ikone') || badgeDefinitions[badgeDefinitions.length - 1]
-        : badgeDefinitions.find((badge) => badge.id === 'community-champion') || badgeDefinitions[badgeDefinitions.length - 1];
-    }
-
-    const unlocked = badgeDefinitions.filter((badge) => points >= badge.minPoints);
-    return unlocked[unlocked.length - 1] || badgeDefinitions[0];
-  };
-
-  const badgeDefinitions = [
-    { id: 'spurenleser', title: 'Spurenleser', subtitle: 'Ab 100 Punkte', icon: '🔎', achieved: stats.points >= 100, accent: '#B67A3C', soft: '#F7E8D8' },
-    { id: 'pfadfinder', title: 'Pfadfinder', subtitle: 'Ab 500 Punkte', icon: '🧭', achieved: stats.points >= 500, accent: '#7B8EA4', soft: '#E7EFF8' },
-    { id: 'sauberkeits-waechter', title: 'Sauberkeits-Wächter', subtitle: 'Ab 1.000 Punkte', icon: '🛡️', achieved: stats.points >= 1000, accent: '#3D9E60', soft: '#E3F7EA' },
-    { id: 'stadtheld', title: 'Stadtheld', subtitle: 'Ab 5.000 Punkte', icon: '🏙️', achieved: stats.points >= 5000, accent: '#5F7CC8', soft: '#EAF0FF' },
-    { id: 'community-champion', title: 'Community-Champion', subtitle: 'Ab 10.000 Punkte', icon: '🏆', achieved: stats.points >= 10000, accent: '#D7A82E', soft: '#FFF3C7' },
-    { id: 'umwelt-ikone', title: 'Umwelt-Ikone', subtitle: 'Alternatives End-Badge', icon: '🌿', achieved: stats.points >= 10000 && stats.clean >= 25, accent: '#39A86C', soft: '#E3F7EC' },
-  ];
-
-  const currentBadgeMeta = getBadgeMetaForPoints(stats.points, stats.clean);
-
-  const mapRef = useRef(null);
-  const pendingRegionRef = useRef(null);
-  const locationWatcher = useRef(null);
-  const notifiedReportIds = useRef(new Set());
-  const startupNearbyInfoShown = useRef(false);
-  const locationRef = useRef(null);
-  const notificationStatusRef = useRef('unknown');
-  const lastMarkerSyncTimeRef = useRef(null);
-  const sessionRef = useRef(null);
-  const locationUpdateCounterRef = useRef(0);
-
   useEffect(() => {
     notificationStatusRef.current = notificationStatus;
   }, [notificationStatus]);
@@ -448,8 +773,9 @@ export default function App() {
     let isMounted = true;
 
     const init = async () => {
-      // Zuerst nur Session laden → Splash sofort beenden
+      // Zuerst Session und Einstellungen laden
       try {
+        await loadReportFeedbackSettings();
         const { data: { session } } = await supabase.auth.getSession();
         if (session && isMounted) {
           setSession(session);
@@ -480,7 +806,7 @@ export default function App() {
     init();
 
     const channel = supabase
-      .channel('schema-db-changes') // Eindeutiger Name
+      .channel('schema-db-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'reports' }, 
         async (payload) => {
@@ -588,7 +914,7 @@ export default function App() {
 
       if (data) {
         const points = data.points || 0;
-        const currentBadge = getBadgeMetaForPoints(points, data.clean_count || 0);
+        const currentBadge = getBadgeMetaForPoints(points, data.clean_count || 0, language);
 
         setStats({
           points,
@@ -618,22 +944,19 @@ export default function App() {
 
   const deleteAccount = async () => {
     Alert.alert(
-      "Account löschen",
-      "Sind Sie sicher, dass Sie Ihren Account und alle Daten löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+      t.deleteAccountTitle,
+      t.deleteAccountConfirm,
       [
-        { text: "Abbrechen", style: "cancel" },
-        { text: "Löschen", style: "destructive", onPress: async () => {
+        { text: t.cancel, style: "cancel" },
+        { text: t.deleteBtn, style: "destructive", onPress: async () => {
           try {
-            // Lösche alle Reports des Users
             await supabase.from('reports').delete().eq('user_id', session.user.id);
-            // Lösche Profil
             await supabase.from('profiles').delete().eq('id', session.user.id);
-            // Logout
             await supabase.auth.signOut();
-            Alert.alert("Account gelöscht", "Ihr Account und alle Daten wurden erfolgreich gelöscht.");
+            Alert.alert(t.deleteSuccessTitle, t.deleteSuccessMsg);
           } catch (error) {
             console.log("Fehler beim Löschen:", error);
-            Alert.alert("Fehler", "Beim Löschen ist ein Fehler aufgetreten.");
+            Alert.alert(t.error, t.deleteErrorMsg);
           }
         }}
       ]
@@ -680,7 +1003,7 @@ export default function App() {
         async (loc) => {
           setLocation(loc.coords);
           locationRef.current = loc.coords;
-          updateMapRegion(loc.coords, true);
+          // Nicht updateMapRegion aufrufen, damit ein gewählter Stadt-Fokus stabil bleibt!
           try {
             let rev = await Location.reverseGeocodeAsync(loc.coords);
             if (rev[0]?.city) {
@@ -775,19 +1098,32 @@ export default function App() {
 
     const isNearbyPoop = normalizedType === 'POOP' && distance < 500;
     const isPoisonAlert = normalizedType === 'POISON';
-    if (!isNearbyPoop && !isPoisonAlert) return;
+    const isTrashAlert = normalizedType === 'TRASH' && distance < 500;
+    if (!isNearbyPoop && !isPoisonAlert && !isTrashAlert) return;
 
     notifiedReportIds.current.add(report.id);
-    const typeMeta = getReportTypeMeta(report.size);
-    const distanceText = distance < 100 ? 'ganz nah' : `${Math.round(distance / 10) * 10}m`;
+    const typeMeta = getReportTypeMeta(report.size, language);
+    const distanceText = distance < 100 
+      ? (language === 'de' ? 'ganz nah' : 'very close') 
+      : `${Math.round(distance / 10) * 10}m`;
+
+    const alertTitle = isPoisonAlert
+      ? t.nearbyPoisonNotifTitle
+      : isTrashAlert
+      ? t.nearbyTrashNotifTitle
+      : t.nearbyPoopNotifTitle;
+
+    const alertBody = isPoisonAlert
+      ? `${typeMeta.icon} ${language === 'de' ? `Giftköder gemeldet in ${report.city}` : `Poison bait reported in ${report.city}`}${distance < 500 ? ` (${distanceText})` : ''}`
+      : isTrashAlert
+      ? `${typeMeta.icon} ${language === 'de' ? `Illegaler Müll gemeldet in ${report.city}` : `Illegal dumping reported in ${report.city}`}${distance < 500 ? ` (${distanceText})` : ''}`
+      : `${typeMeta.icon} ${distanceText} ${language === 'de' ? 'entfernt in' : 'away in'} ${report.city}`;
 
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: isPoisonAlert ? 'Giftköder Warnung!' : 'Haufen in der Nähe!',
-          body: isPoisonAlert
-            ? `${typeMeta.icon} Giftköder gemeldet in ${report.city}${distance < 500 ? ` (${distanceText} entfernt)` : ''}`
-            : `${typeMeta.icon} ${distanceText} entfernt in ${report.city}`,
+          title: alertTitle,
+          body: alertBody,
           sound: 'default',
           ...(Platform.OS === 'android' ? { channelId: 'poop-alerts' } : {}),
         },
@@ -818,7 +1154,7 @@ export default function App() {
       });
       const counts = visibleReports.reduce((acc, item) => {
         if (getNormalizedReportType(item.size) !== 'POOP') return acc;
-        if (item.city && item.city !== "Ortung...") {
+        if (item.city && item.city !== "Ortung..." && item.city !== "Locating...") {
           acc[item.city] = (acc[item.city] || 0) + 1; 
         }
         return acc; 
@@ -833,6 +1169,7 @@ export default function App() {
       if (!startupNearbyInfoShown.current && effectiveLocation && isLocationFresh(effectiveLocation)) {
         const nearbyPoop = [];
         const nearbyPoison = [];
+        const nearbyTrash = [];
         const currentUserId = sessionRef.current?.user?.id || session?.user?.id;
 
         visibleReports.forEach((report) => {
@@ -849,22 +1186,42 @@ export default function App() {
           if (distance > 500) return;
 
           if (normalizedType === 'POISON') nearbyPoison.push(report);
+          if (normalizedType === 'TRASH') nearbyTrash.push(report);
           if (normalizedType === 'POOP') nearbyPoop.push(report);
         });
 
-        if (nearbyPoop.length > 0 || nearbyPoison.length > 0) {
+        if (nearbyPoop.length > 0 || nearbyPoison.length > 0 || nearbyTrash.length > 0) {
           startupNearbyInfoShown.current = true;
 
-          const alertBody = nearbyPoop.length > 0
-            ? `Pass auf deine Snicker auf. In 500m Naehe gefunden: ${nearbyPoop.length} Haufen`
-            : `Achtung: ${nearbyPoison.length} Giftköder`;
+          let alertBody = '';
+          if (nearbyPoison.length > 0) {
+            alertBody = t.nearbyPoisonAlert.replace('{count}', nearbyPoison.length);
+          } else if (nearbyTrash.length > 0) {
+            alertBody = t.nearbyTrashAlert.replace('{count}', nearbyTrash.length);
+          } else {
+            alertBody = t.nearbyPoopAlert.replace('{count}', nearbyPoop.length);
+          }
 
-          Alert.alert('Achtung', alertBody);
+          Alert.alert(t.warning, alertBody);
 
           try {
             await Notifications.scheduleNotificationAsync({
               content: {
-                title: 'Umgebungscheck beim Start',
+                title: t.startupCheckTitle,
+                body: alertBody,
+                sound: 'default',
+                ...(Platform.OS === 'android' ? { channelId: 'poop-alerts' } : {}),
+              },
+              trigger: { seconds: 1 },
+            });
+          } catch (startupNotificationError) {
+            console.log('Fehler beim Start-Umgebungscheck:', startupNotificationError);
+          }
+        }
+      }
+    }
+  };
+                title: t.startupCheckTitle,
                 body: alertBody,
                 sound: 'default',
                 ...(Platform.OS === 'android' ? { channelId: 'poop-alerts' } : {}),
@@ -886,7 +1243,7 @@ export default function App() {
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password });
     setIsLoading(false);
-    if (error) Alert.alert("Fehler", error.message);
+    if (error) Alert.alert(t.error, error.message);
     else { setShowAuth(false); setEmail(''); setPassword(''); }
   };
 
@@ -943,7 +1300,7 @@ export default function App() {
         .sort((a, b) => (b.points || 0) - (a.points || 0) || (b.total_reports || 0) - (a.total_reports || 0))
         .slice(0, 20)
         .map((item, index) => {
-          const badge = getBadgeMetaForPoints(item.points || 0, item.clean_count || 0);
+          const badge = getBadgeMetaForPoints(item.points || 0, item.clean_count || 0, language);
           return {
             id: item.id,
             rank: index + 1,
@@ -974,7 +1331,7 @@ export default function App() {
 
     if (error) {
       console.log('Fehler beim Speichern der Profil-Einstellungen:', error.message);
-      Alert.alert('Fehler', 'Profil-Einstellungen konnten nicht gespeichert werden.');
+      Alert.alert(t.error, t.profileSaveError);
       return;
     }
 
@@ -1001,6 +1358,7 @@ export default function App() {
         longitudeDelta: 0.01,
       };
 
+      setMapRegion(region);
       setActiveTab('Radar');
       pendingRegionRef.current = region;
 
@@ -1012,9 +1370,9 @@ export default function App() {
   };
 
   const reportPoop = async () => {
-    if (!session) { Alert.alert("Stop!", "Bitte erst anmelden!"); return; }
-    if (!location || currentCity === "Ortung...") {
-      Alert.alert("Warte...", "Dein Standort wird noch präzisiert.");
+    if (!session) { Alert.alert(t.stop, t.signInRequired); return; }
+    if (!location || currentCity === "Ortung..." || currentCity === "Locating...") {
+      Alert.alert(t.wait, t.locationWaiting);
       return;
     }
 
@@ -1055,7 +1413,11 @@ export default function App() {
       ]);
 
       const normalizedType = getNormalizedReportType(selectedSize);
-      const reportPoints = normalizedType === 'POOP' ? 10 : normalizedType === 'BIN_BAGS' ? 5 : normalizedType === 'POISON' ? 15 : 0;
+      const reportPoints = normalizedType === 'POOP' ? 10 
+        : normalizedType === 'BIN_BAGS' ? 5 
+        : normalizedType === 'POISON' ? 15 
+        : normalizedType === 'TRASH' ? 20 
+        : 0;
 
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -1078,8 +1440,8 @@ export default function App() {
 
       await updateProfileData(session);
 
-      const typeMeta = getReportTypeMeta(selectedSize);
-      const successMessage = `${typeMeta.label} wurde gemeldet! +${reportPoints} XP`;
+      const typeMeta = getReportTypeMeta(selectedSize, language);
+      const successMessage = `${typeMeta.label} ${t.reportedSuccess} +${reportPoints} XP`;
       setReportSuccessMessage(successMessage);
       setShowReportSuccessToast(true);
       setTimeout(() => {
@@ -1123,18 +1485,20 @@ export default function App() {
           Vibration.vibrate(100);
         }
         await updateProfileData(session);
-        Alert.alert("Sauber!", `Du hast ${rewardPoints} XP verdient! 🧹`);
+        Alert.alert(t.cleanTitle, t.earnedXp.replace('{points}', rewardPoints));
     }
   };
 
   const openLegal = (title, text) => { setLegalContent({ title, text }); setLegalVisible(true); };
 
-  if (isLoading) return <View style={styles.splash}><ActivityIndicator size="large" color="#8B4513" /><Text style={{marginTop: 15, color: '#8B4513', fontWeight: 'bold'}}>Radar lädt...</Text></View>;
+  if (isLoading) return <View style={styles.splash}><ActivityIndicator size="large" color="#8B4513" /><Text style={{marginTop: 15, color: '#8B4513', fontWeight: 'bold'}}>{t.loading}</Text></View>;
+
+  const displayCity = currentCity === "Ortung..." ? t.locating : currentCity;
 
   return (
     <View style={styles.container}>
       <View style={[styles.header, styles.shadow]}>
-        <View><Text style={styles.xpTitle}>{session ? "PROFI" : "GAST"}</Text><Text style={styles.xpValue}>{stats.points} XP | {currentCity}</Text></View>
+        <View><Text style={styles.xpTitle}>{session ? t.pro : t.guest}</Text><Text style={styles.xpValue}>{stats.points} XP | {displayCity}</Text></View>
       </View>
 
       {activeTab === 'Radar' && (
@@ -1162,28 +1526,26 @@ export default function App() {
               loadingIndicatorColor="#8B4513"
               mapType="standard"
               onMapReady={() => {
-                if (mapRegion && mapRef.current) {
-                  mapRef.current.animateToRegion(mapRegion, 1000);
-                }
                 if (pendingRegionRef.current && mapRef.current) {
                   mapRef.current.animateToRegion(pendingRegionRef.current, 1000);
                   pendingRegionRef.current = null;
+                } else if (mapRegion && mapRef.current) {
+                  mapRef.current.animateToRegion(mapRegion, 1000);
                 }
               }}
               style={styles.map} 
               showsUserLocation
-              followsUserLocation={true}
+              followsUserLocation={false}
               region={mapRegion}
             > 
-            {(markers.filter((marker) => getNormalizedReportType(marker.size) === 'POOP')).map((marker, index) => {
+            {markers.map((marker, index) => {
               const markerKey = marker.id ? marker.id.toString() : `temp-${index}`;
               const lat = Number(marker.latitude);
               const lng = Number(marker.longitude);
 
-              // Sicherheitscheck bleibt, damit die App nicht crasht
               if (isNaN(lat) || isNaN(lng)) return null;
 
-              const markerMeta = getReportTypeMeta(marker.size);
+              const markerMeta = getReportTypeMeta(marker.size, language);
               const markerSize = markerMeta.markerSize;
               const markerContainerSize = markerSize + 12;
               const markerLabel = markerMeta.icon || markerMeta.shortLabel || '?';
@@ -1235,28 +1597,28 @@ export default function App() {
 
           {selectedPoop ? (
             <View style={[styles.infoCard, styles.shadow]}>
-              <Text style={styles.infoTitle}>{getReportTypeMeta(selectedPoop.size).icon} Fund in {selectedPoop.city}</Text>
+              <Text style={styles.infoTitle}>{getReportTypeMeta(selectedPoop.size, language).icon} {t.foundIn} {selectedPoop.city}</Text>
               <Text style={{color: '#666', marginBottom: 15, fontWeight: 'bold'}}>
-                Typ: {getReportTypeMeta(selectedPoop.size).label}
+                {t.type} {getReportTypeMeta(selectedPoop.size, language).label}
               </Text>
               <TouchableOpacity style={styles.deleteBtn} onPress={deletePoop}>
-                <Text style={{color: 'white', fontWeight: 'bold', fontSize: 16}}>ICH HAB'S WEGGERÄUMT ✅</Text>
+                <Text style={{color: 'white', fontWeight: 'bold', fontSize: 16}}>{t.cleaned}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setSelectedPoop(null)} style={{marginTop: 10}}>
-                <Text style={{textAlign: 'center', color: '#999', fontWeight: 'bold'}}>Schließen</Text>
+                <Text style={{textAlign: 'center', color: '#999', fontWeight: 'bold'}}>{t.close}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={[styles.overlay, styles.shadow, isReportTypeExpanded ? styles.overlayExpanded : styles.overlayCollapsed]}>
               <TouchableOpacity onPress={() => setIsReportTypeExpanded((prev) => !prev)} style={styles.overlayToggleRow} activeOpacity={0.8}>
-                <Text style={styles.overlayLabel}>MELDETYP WÄHLEN</Text>
+                <Text style={styles.overlayLabel}>{t.reportType}</Text>
                 <Text style={styles.overlayToggleSymbol}>{isReportTypeExpanded ? '▾' : '▴'}</Text>
               </TouchableOpacity>
 
               {isReportTypeExpanded && (
                 <>
                   <View style={styles.sizeRow}>
-                    {REPORT_TYPE_OPTIONS.map(item => (
+                    {getReportTypeOptions(language).map(item => (
                       <View key={item.id} style={{alignItems: 'center'}}>
                         <TouchableOpacity 
                           onPress={() => setSelectedSize(item.id)} 
@@ -1281,7 +1643,7 @@ export default function App() {
                   </View>
 
                   <TouchableOpacity style={styles.mainReportBtnCompact} onPress={reportPoop}>
-                    <Text style={styles.mainReportBtnText}>MELDUNG ABSENDEN</Text>
+                    <Text style={styles.mainReportBtnText}>{t.submitReport}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -1292,8 +1654,8 @@ export default function App() {
 
       {activeTab === 'Score' && (
         <View style={styles.scoreContainer}>
-          <Text style={styles.scoreTitle}>🏆 City Ranking</Text>
-          <Text style={styles.scoreSubTitle}>Top 30 Städte</Text>
+          <Text style={styles.scoreTitle}>{t.cityRanking}</Text>
+          <Text style={styles.scoreSubTitle}>{t.top30Cities}</Text>
           <FlatList 
             data={cityStats} 
             keyExtractor={(item) => item.name} 
@@ -1312,8 +1674,8 @@ export default function App() {
 
       {activeTab === 'Top' && (
         <View style={styles.scoreContainer}>
-          <Text style={styles.scoreTitle}>🥇 Top 20 Melder</Text>
-          <Text style={styles.scoreSubTitle}>Nur Profile mit freigegebenen Nicknames</Text>
+          <Text style={styles.scoreTitle}>{t.topReporters}</Text>
+          <Text style={styles.scoreSubTitle}>{t.leaderboardNote}</Text>
           <FlatList
             data={leaderboard}
             keyExtractor={(item) => item.id}
@@ -1325,13 +1687,13 @@ export default function App() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 16, fontWeight: '600' }}>{item.nickname}</Text>
-                  <Text style={{ color: '#666', marginTop: 4 }}>{item.badge?.title || 'Neuling'} • {item.totalReports} Meldungen • {item.points} XP</Text>
+                  <Text style={{ color: '#666', marginTop: 4 }}>{item.badge?.title || t.badgeStarterTitle} • {item.totalReports} {t.reportsLabel} • {item.points} XP</Text>
                 </View>
               </View>
             )}
             ListEmptyComponent={() => (
               <View style={[styles.scoreItem, styles.shadow, { justifyContent: 'center' }]}>
-                <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>Noch keine freigegebenen Melder in der Bestenliste.</Text>
+                <Text style={{ fontSize: 16, color: '#666', textAlign: 'center' }}>{t.noReporters}</Text>
               </View>
             )}
           />
@@ -1347,12 +1709,12 @@ export default function App() {
 
             {isEditingName ? (
               <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 15}}>
-                <TextInput style={styles.nameEditInput} value={editNameInput} onChangeText={setEditNameInput} autoFocus placeholder="Dein Name" />
+                <TextInput style={styles.nameEditInput} value={editNameInput} onChangeText={setEditNameInput} autoFocus placeholder={t.namePlaceholder} />
                 <TouchableOpacity onPress={saveName} style={styles.nameSaveBtn}><Text style={{color: 'white', fontWeight: 'bold'}}>OK</Text></TouchableOpacity>
               </View>
             ) : (
               <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 15}}>
-                <Text style={styles.profileNameMain}>{displayName}</Text>
+                <Text style={styles.profileNameMain}>{session ? displayName : t.guestMode}</Text>
                 {session && (
                   <TouchableOpacity onPress={() => { setEditNameInput(displayName); setIsEditingName(true); }} style={{marginLeft: 10}}>
                     <Text style={{fontSize: 20}}>✏️</Text>
@@ -1360,23 +1722,98 @@ export default function App() {
                 )}
               </View>
             )}
-            <Text style={styles.profileEmailSub}>{session?.user?.email || "Melde dich an für mehr XP"}</Text>
+            <Text style={styles.profileEmailSub}>{session?.user?.email || t.signInForXp}</Text>
+          </View>
+
+          {/* Moderner Apple DE/EN Sprachschalter */}
+          <View style={[styles.languageSection, styles.shadow]}>
+            <View style={styles.languageHeaderRow}>
+              <Text style={styles.notificationSectionTitle}>{t.language}</Text>
+              <View style={styles.languageBadge}>
+                <Text style={styles.languageBadgeText}>{language === 'de' ? '🇩🇪 Deutsch' : '🇬🇧 English'}</Text>
+              </View>
+            </View>
+
+            <View style={styles.appleLanguageSwitchRow}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => changeLanguage('de')}
+                style={[
+                  styles.languageFlagSideBtn,
+                  language === 'de' && styles.languageSideActive,
+                ]}
+              >
+                <Text style={styles.languageFlagSide}>🇩🇪</Text>
+                <Text
+                  style={[
+                    styles.languageCodeText,
+                    language === 'de' && styles.languageCodeTextActive,
+                  ]}
+                >
+                  DE
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => changeLanguage(language === 'de' ? 'en' : 'de')}
+                style={[
+                  styles.appleSwitchTrack,
+                  { backgroundColor: language === 'en' ? '#8B4513' : '#B89068' },
+                ]}
+              >
+                <Animated.View
+                  style={[
+                    styles.appleSwitchKnob,
+                    {
+                      transform: [
+                        {
+                          translateX: switchAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 32],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => changeLanguage('en')}
+                style={[
+                  styles.languageFlagSideBtn,
+                  language === 'en' && styles.languageSideActive,
+                ]}
+              >
+                <Text style={styles.languageFlagSide}>🇬🇧</Text>
+                <Text
+                  style={[
+                    styles.languageCodeText,
+                    language === 'en' && styles.languageCodeTextActive,
+                  ]}
+                >
+                  EN
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {session && (
             <View style={[styles.notificationSection, styles.shadow, { marginBottom: 25 }]}> 
-              <Text style={styles.notificationSectionTitle}>Profil für Bestenliste</Text>
+              <Text style={styles.notificationSectionTitle}>{t.leaderboardProfile}</Text>
               <TextInput
                 style={styles.inputField}
                 value={nicknameInput}
                 onChangeText={setNicknameInput}
-                placeholder="Dein Nickname"
+                placeholder={t.nicknamePlaceholder}
                 autoCapitalize="words"
               />
               <View style={styles.settingRow}>
                 <View style={styles.settingCopy}>
-                  <Text style={styles.settingTitle}>Veröffentlichung erlauben</Text>
-                  <Text style={styles.settingHint}>Zeige deinen Nickname in der Top 20 Liste.</Text>
+                  <Text style={styles.settingTitle}>{t.allowPublishing}</Text>
+                  <Text style={styles.settingHint}>{t.publishingHint}</Text>
                 </View>
                 <Switch
                   value={publishInList}
@@ -1386,7 +1823,7 @@ export default function App() {
                 />
               </View>
               <TouchableOpacity style={[styles.mainReportBtn, { backgroundColor: '#8B4513', marginTop: 8 }]} onPress={saveProfileSettings}>
-                <Text style={styles.mainReportBtnText}>Speichern</Text>
+                <Text style={styles.mainReportBtnText}>{t.save}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -1403,21 +1840,25 @@ export default function App() {
           </View>
 
           <View style={[styles.pointsInfoCard, styles.shadow]}>
-            <Text style={styles.pointsInfoTitle}>Punkte pro Meldung</Text>
+            <Text style={styles.pointsInfoTitle}>{t.pointsInfoTitle}</Text>
             <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>💩 Haufen</Text>
+              <Text style={styles.pointsInfoLabel}>💩 {t.reportPoop}</Text>
               <Text style={styles.pointsInfoValue}>+10 XP</Text>
             </View>
             <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>🗑️ Tüten</Text>
+              <Text style={styles.pointsInfoLabel}>🗑️ {t.reportBagsShort}</Text>
               <Text style={styles.pointsInfoValue}>+5 XP</Text>
             </View>
             <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>⚠️ Giftköder</Text>
+              <Text style={styles.pointsInfoLabel}>⚠️ {t.reportPoison}</Text>
               <Text style={styles.pointsInfoValue}>+15 XP</Text>
             </View>
             <View style={styles.pointsInfoRow}>
-              <Text style={styles.pointsInfoLabel}>🧹 Aufräumen</Text>
+              <Text style={styles.pointsInfoLabel}>🚫 {t.reportTrash}</Text>
+              <Text style={styles.pointsInfoValue}>+20 XP</Text>
+            </View>
+            <View style={styles.pointsInfoRow}>
+              <Text style={styles.pointsInfoLabel}>🧹 {t.cleanUp}</Text>
               <Text style={styles.pointsInfoValue}>+25 XP</Text>
             </View>
           </View>
@@ -1426,44 +1867,44 @@ export default function App() {
             <View style={[styles.statBox, styles.shadow]}>
               <Text style={{fontSize: 20}}>⭐</Text>
               <Text style={styles.statValue}>{stats.points}</Text>
-              <Text style={styles.statLabel}>PUNKTE</Text>
+              <Text style={styles.statLabel}>{t.points}</Text>
             </View>
             <View style={[styles.statBox, styles.shadow]}>
               <Text style={{fontSize: 20}}>💩</Text>
               <Text style={styles.statValue}>{stats.total}</Text>
-              <Text style={styles.statLabel}>MELDUNGEN</Text>
+              <Text style={styles.statLabel}>{t.reports}</Text>
             </View>
             <View style={[styles.statBox, styles.shadow]}>
               <Text style={{fontSize: 20}}>🧹</Text>
               <Text style={styles.statValue}>{stats.clean}</Text>
-              <Text style={styles.statLabel}>CLEAN</Text>
+              <Text style={styles.statLabel}>{t.clean}</Text>
             </View>
           </View>
 
           <View style={[styles.notificationSection, styles.shadow]}>
-            <Text style={styles.notificationSectionTitle}>Benachrichtigungen</Text>
+            <Text style={styles.notificationSectionTitle}>{t.notifications}</Text>
             <Text style={styles.notificationStatusText}>
               {notificationStatus === 'granted'
-                ? 'Benachrichtigungen sind aktiviert.'
+                ? t.notificationsOn
                 : notificationStatus === 'denied'
-                ? 'Benachrichtigungen sind deaktiviert.'
-                : 'Benachrichtigungsstatus unklar.'}
+                ? t.notificationsOff
+                : t.notificationsUnknown}
             </Text>
-            <Text style={styles.notificationStatusText}>Push-Token: {pushTokenStatus}</Text>
+            <Text style={styles.notificationStatusText}>{t.pushToken}: {pushTokenStatus}</Text>
             {notificationStatus !== 'granted' && (
               <TouchableOpacity onPress={openNotificationSettings} style={styles.openSettingsBtn}>
-                <Text style={styles.openSettingsBtnText}>Einstellungen öffnen</Text>
+                <Text style={styles.openSettingsBtnText}>{t.openSettings}</Text>
               </TouchableOpacity>
             )}
           </View>
 
           <View style={[styles.notificationSection, styles.shadow]}>
-            <Text style={styles.notificationSectionTitle}>Feedback beim Melden</Text>
+            <Text style={styles.notificationSectionTitle}>{t.reportFeedback}</Text>
 
             <View style={styles.settingRow}>
               <View style={styles.settingCopy}>
-                <Text style={styles.settingTitle}>Vibration</Text>
-                <Text style={styles.settingHint}>Kurzes Vibrationssignal beim Haufen melden.</Text>
+                <Text style={styles.settingTitle}>{t.vibration}</Text>
+                <Text style={styles.settingHint}>{t.vibrationHint}</Text>
               </View>
               <Switch
                 value={reportVibrationEnabled}
@@ -1480,8 +1921,8 @@ export default function App() {
 
             <View style={styles.settingRow}>
               <View style={styles.settingCopy}>
-                <Text style={styles.settingTitle}>Signalton</Text>
-                <Text style={styles.settingHint}>Kurzer Ton beim erfolgreichen Tippen auf Melden.</Text>
+                <Text style={styles.settingTitle}>{t.sound}</Text>
+                <Text style={styles.settingHint}>{t.soundHint}</Text>
               </View>
               <Switch
                 value={reportSoundEnabled}
@@ -1493,7 +1934,7 @@ export default function App() {
           </View>
 
           <View style={[styles.badgeSection, styles.shadow]}>
-            <Text style={styles.badgeSectionTitle}>BADGES & MELDETYPEN</Text>
+            <Text style={styles.badgeSectionTitle}>{t.badgesTitle}</Text>
             <View style={styles.badgeGrid}>
               {badgeDefinitions.map((badge) => {
                 const activeAccent = badge.accent || '#E7C68A';
@@ -1535,14 +1976,14 @@ export default function App() {
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity onPress={() => openLegal('Datenschutz & Impressum', datenschutzText)} style={{marginBottom: 10}}>
-              <Text style={styles.footerLink}>Datenschutz & Impressum</Text>
+            <TouchableOpacity onPress={() => openLegal(t.privacy, language === 'en' ? datenschutzTextEn : datenschutzText)} style={{marginBottom: 10}}>
+              <Text style={styles.footerLink}>{t.privacy}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => session ? supabase.auth.signOut() : setShowAuth(true)} 
               style={[styles.authMainTrigger, {backgroundColor: session ? '#555' : '#8B4513'}]}
             >
-              <Text style={styles.authMainTriggerText}>{session ? 'AUSLOGGEN' : 'LOGIN / REGISTRIEREN'}</Text>
+              <Text style={styles.authMainTriggerText}>{session ? t.logout : t.loginRegister}</Text>
             </TouchableOpacity>
             <Text style={styles.footerSignature}>edit by pifka07</Text>
           </View>
@@ -1551,10 +1992,15 @@ export default function App() {
       )}
 
       <View style={styles.navbar}>
-        {['Radar', 'Score', 'Top', 'Profil'].map(t => (
-          <TouchableOpacity key={t} onPress={() => setActiveTab(t)} style={styles.navItem}>
-            <Text style={{fontSize: 22, opacity: activeTab === t ? 1 : 0.4}}>{t === 'Radar' ? '🗺️' : (t === 'Score' ? '🏆' : (t === 'Top' ? '🥇' : '👀'))}</Text>
-            <Text style={[styles.navText, {color: activeTab === t ? '#8B4513' : '#999'}]}>{t}</Text>
+        {[
+          { key: 'Radar', icon: '🗺️', label: t.radar },
+          { key: 'Score', icon: '🏆', label: t.score },
+          { key: 'Top', icon: '🥇', label: t.top },
+          { key: 'Profil', icon: '👀', label: t.profile }
+        ].map(item => (
+          <TouchableOpacity key={item.key} onPress={() => setActiveTab(item.key)} style={styles.navItem}>
+            <Text style={{fontSize: 22, opacity: activeTab === item.key ? 1 : 0.4}}>{item.icon}</Text>
+            <Text style={[styles.navText, {color: activeTab === item.key ? '#8B4513' : '#999'}]}>{item.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -1562,17 +2008,18 @@ export default function App() {
       <Modal visible={showAuth} animationType="slide">
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.authFullContainer}>
           <View style={styles.authForm}>
-            <Text style={styles.authHeroTitle}>Haufen-Jäger</Text>
-            <TextInput style={styles.inputField} placeholder="E-Mail" value={email} onChangeText={setEmail} autoCapitalize="none" />
-            <TextInput style={styles.inputField} placeholder="Passwort" value={password} onChangeText={setPassword} secureTextEntry />
+            <Text style={styles.authHeroTitle}>{t.heroTitle}</Text>
+            <TextInput style={styles.inputField} placeholder={t.email} value={email} onChangeText={setEmail} autoCapitalize="none" />
+            <TextInput style={styles.inputField} placeholder={t.password} value={password} onChangeText={setPassword} secureTextEntry />
+            <Text style={styles.passwordHint}>{t.passwordHint}</Text>
             <TouchableOpacity style={styles.loginBtn} onPress={() => handleAuth('login')}>
-              <Text style={styles.loginBtnText}>EINLOGGEN</Text>
+              <Text style={styles.loginBtnText}>{t.login}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.signupBtn} onPress={() => handleAuth('signup')}>
-              <Text style={styles.signupBtnText}>Konto erstellen</Text>
+              <Text style={styles.signupBtnText}>{t.createAccount}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setShowAuth(false)} style={styles.cancelAuth}>
-              <Text style={{color: '#999', fontWeight: 'bold'}}>Abbrechen</Text>
+              <Text style={{color: '#999', fontWeight: 'bold'}}>{t.cancel}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1593,11 +2040,11 @@ export default function App() {
                 }}
                 style={{marginTop:12, alignSelf:'flex-start'}}
               >
-                <Text style={{color:'#8B4513', fontWeight:'600', textDecorationLine:'underline', fontSize:15}}>Account löschen</Text>
+                <Text style={{color:'#8B4513', fontWeight:'600', textDecorationLine:'underline', fontSize:15}}>{t.deleteAccountTitle}</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity onPress={() => setLegalVisible(false)} style={{backgroundColor:'#8B4513', padding:12, borderRadius:12, marginTop:15}}>
-              <Text style={{color:'white', fontWeight:'bold', textAlign:'center', fontSize:16}}>Schließen</Text>
+              <Text style={{color:'white', fontWeight:'bold', textAlign:'center', fontSize:16}}>{t.close}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1616,7 +2063,7 @@ const styles = StyleSheet.create({
   headerProfileBtnText: { color: '#8B4513', fontWeight: 'bold', fontSize: 12 },
   adContainer: { backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', paddingVertical: 6, borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#EEE' },
   map: { flex: 1 },
-  overlay: { position: 'absolute', bottom: 18, left: 20, right: 20, backgroundColor: 'white', borderRadius: 24, paddingHorizontal: 18, paddingTop: 10, paddingBottom: 14, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 8 },
+  overlay: { position: 'absolute', bottom: 18, left: 16, right: 16, backgroundColor: 'white', borderRadius: 24, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 14, borderWidth: 1, borderColor: '#EAEAEA', shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 5 }, elevation: 8 },
   overlayExpanded: { paddingBottom: 14 },
   overlayCollapsed: { paddingBottom: 10 },
   overlayToggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 4 },
@@ -1625,7 +2072,7 @@ const styles = StyleSheet.create({
   successToast: { position: 'absolute', left: 24, right: 24, bottom: 110, backgroundColor: '#1E1E1E', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, shadowOffset: { width: 0, height: 3 }, elevation: 6 },
   successToastText: { color: 'white', fontSize: 14, fontWeight: '700', textAlign: 'center' },
   sizeRow: { flexDirection: 'row', justifyContent: 'center', marginBottom: 14, marginTop: 8 },
-  sizeBtn: { width: 58, height: 58, backgroundColor: '#f0f0f0', borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginHorizontal: 10 },
+  sizeBtn: { width: 52, height: 52, backgroundColor: '#f0f0f0', borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginHorizontal: 6 },
   sizeBtnActive: { backgroundColor: '#8B4513' },
   mainReportBtn: { height: 54, backgroundColor: '#FF4136', borderRadius: 15, justifyContent: 'center', alignItems: 'center' },
   mainReportBtnCompact: { height: 46, backgroundColor: '#FF4136', borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
@@ -1634,13 +2081,25 @@ const styles = StyleSheet.create({
   navItem: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   navText: { fontSize: 11, fontWeight: 'bold', marginTop: 4 },
   profileScroll: { flex: 1, padding: 20 },
-  profileHeaderCenter: { alignItems: 'center', marginBottom: 30 },
+  profileHeaderCenter: { alignItems: 'center', marginBottom: 24 },
   avatarLarge: { width: 90, height: 90, borderRadius: 45, backgroundColor: '#FF6347', justifyContent: 'center', alignItems: 'center' },
   avatarTextLarge: { color: 'white', fontSize: 40, fontWeight: 'bold' },
   profileNameMain: { fontSize: 24, fontWeight: 'bold' },
   profileEmailSub: { color: '#999', marginTop: 5 },
   nameEditInput: { backgroundColor: '#EEE', borderRadius: 8, paddingHorizontal: 15, height: 40, width: 160, fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
   nameSaveBtn: { backgroundColor: '#4CAF50', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8, marginLeft: 10 },
+  languageSection: { backgroundColor: 'white', borderRadius: 22, padding: 18, marginBottom: 20, borderWidth: 1, borderColor: '#E8E8EA' },
+  languageHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  languageBadge: { backgroundColor: '#FDF5E6', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: '#DEB887' },
+  languageBadgeText: { fontSize: 12, fontWeight: 'bold', color: '#8B4513' },
+  appleLanguageSwitchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, paddingVertical: 4 },
+  languageFlagSideBtn: { alignItems: 'center', justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 14, borderRadius: 16, minWidth: 64 },
+  languageSideActive: { backgroundColor: '#FDF5E6', borderWidth: 1, borderColor: '#DEB887' },
+  languageFlagSide: { fontSize: 28, marginBottom: 3 },
+  languageCodeText: { fontSize: 13, fontWeight: '600', color: '#999' },
+  languageCodeTextActive: { color: '#8B4513', fontWeight: 'bold' },
+  appleSwitchTrack: { width: 72, height: 40, borderRadius: 20, padding: 4, justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 3, elevation: 3 },
+  appleSwitchKnob: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3, elevation: 4 },
   rankingCard: { backgroundColor: '#FF7F50', borderRadius: 25, padding: 22, marginBottom: 20 },
   rankLabel: { color: 'white', fontSize: 11, fontWeight: 'bold' },
   rankNumber: { color: 'white', fontSize: 48, fontWeight: 'bold' },
@@ -1681,6 +2140,8 @@ const styles = StyleSheet.create({
   scoreSubTitle: { color: '#999', marginBottom: 20 },
   scoreItem: { flexDirection: 'row', padding: 20, backgroundColor: 'white', borderRadius: 18, marginBottom: 12, alignItems: 'center' },
   scoreRank: { fontSize: 20, fontWeight: 'bold', color: '#FF7F50', minWidth: 60, textAlign: 'center', marginRight: 12 },
+  leaderboardBadgeMini: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFF4DF', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  leaderboardBadgeMiniIcon: { fontSize: 18 },
   infoCard: { position: 'absolute', bottom: 30, left: 20, right: 20, backgroundColor: 'white', padding: 25, borderRadius: 25 },
   infoTitle: { fontWeight: 'bold', fontSize: 20, marginBottom: 5 },
   deleteBtn: { backgroundColor: '#4CAF50', padding: 18, borderRadius: 15, marginTop: 10, alignItems: 'center' },
@@ -1689,6 +2150,7 @@ const styles = StyleSheet.create({
   authForm: { flex: 1, padding: 30, justifyContent: 'center' },
   authHeroTitle: { fontSize: 36, fontWeight: 'bold', color: '#333', marginBottom: 10 },
   inputField: { height: 65, backgroundColor: '#F7F7F7', borderRadius: 15, paddingHorizontal: 20, marginBottom: 15, fontSize: 16, borderWidth: 1, borderColor: '#EEE' },
+  passwordHint: { fontSize: 12, color: '#888', marginTop: -8, marginBottom: 14, paddingHorizontal: 4 },
   badgeSection: { backgroundColor: 'white', borderRadius: 25, padding: 20, marginBottom: 25, borderWidth: 1, borderColor: '#E8E8EA' },
   badgeSectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 14, color: '#333', letterSpacing: 0.5, textTransform: 'uppercase' },
   badgeGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },

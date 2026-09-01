@@ -126,3 +126,132 @@ Dein Name
 Deine Adresse
 Kontakt...
 `;
+
+export const datenschutzTextEn = `
+Privacy Policy Poop Radar
+
+As of: March 2026
+
+1. Controller
+
+Responsible for data processing in this app is:
+
+T&W Zimmermann
+service@umdieecke.info
+
+2. General Information
+
+We take the protection of your personal data seriously and process it in accordance with the General Data Protection Regulation (GDPR).
+
+3. Data Collected
+a) Account Data (Login)
+
+When registering and using an account, the following data is processed:
+
+Email address
+Username (optional)
+
+This data is necessary to provide you with a user account.
+
+b) Location Data
+
+The app collects precise location data to enable placing markers on the map. This data is transmitted to our database (Supabase) and displayed to other users as a marker on the map. Your location is not linked to your personal identity for other users. The app does not send data in the background; all transmissions occur only upon explicit user action.
+
+The app uses your device's location to:
+
+display your position on the map
+correctly assign reported locations
+
+Location data is only used with your consent.
+
+c) Usage and Content Data
+
+When using the app, the following data is stored:
+
+reported locations (e.g. dog poop)
+timestamps of reports
+points, levels, and statistics
+
+This data is necessary for the app to function properly.
+
+4. Use of Supabase
+
+To provide the app, we use Supabase (Backend-as-a-Service).
+
+Provider:
+Supabase Inc., USA
+Privacy Policy: https://supabase.com/privacy
+
+Supabase processes data such as:
+
+Account data (email, login)
+stored content (reports, statistics)
+
+The data is stored on Supabase servers. Appropriate safeguards (e.g. Standard Contractual Clauses) are in place to ensure an adequate level of data protection.
+
+5. Use of Expo
+
+The app is developed and deployed using Expo.
+
+Provider:
+Expo (formerly Expo Inc.), USA
+Privacy Policy: https://expo.dev/privacy
+
+Expo may process data when using the app, particularly in connection with app updates, analytics, and crash reports.
+
+6. Purpose of Processing
+
+Data is processed to:
+
+provide app functionality
+manage user accounts
+store and display content (reports)
+calculate rankings and statistics
+
+7. Data Disclosure
+
+Your data will:
+
+not be sold
+not be passed on to third parties for advertising
+
+Data is only shared to the extent technically necessary (e.g. with Supabase as hosting provider).
+
+8. Storage and Deletion
+
+Your data is stored only as long as necessary for the use of the app.
+
+You can delete your account at any time. In this case, your personal data will be deleted unless statutory retention requirements apply.
+
+9. Your Rights
+
+You have the right to:
+
+access your stored data
+rectify inaccurate data
+erase your data
+restrict processing
+data portability
+
+10. Security and Account Deletion
+
+We implement technical and organizational measures to protect your data against loss, misuse, or unauthorized access.
+
+You can delete your account independently at any time via the "Delete account" link in the privacy dialog. In this case, your personal data will be deleted unless statutory retention requirements apply.
+
+11. Changes
+
+This privacy policy may be updated as needed.
+
+12. Contact
+
+For privacy-related questions:
+
+service@umdieecke.info
+`;
+
+export const impressumTextEn = `
+Your Name
+Your Address
+Contact...
+`;
