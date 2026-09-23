@@ -616,6 +616,15 @@ export default function App() {
     }
   };
 
+  const goToMyLocation = () => {
+    const currentLocation = locationRef.current || location;
+    if (currentLocation) {
+      updateMapRegion(currentLocation, true);
+    } else {
+      Alert.alert(t.wait, t.locationWaiting);
+    }
+  };
+
   const registerNotificationPermissions = async () => {
     try {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -1221,20 +1230,6 @@ export default function App() {
       }
     }
   };
-                title: t.startupCheckTitle,
-                body: alertBody,
-                sound: 'default',
-                ...(Platform.OS === 'android' ? { channelId: 'poop-alerts' } : {}),
-              },
-              trigger: { seconds: 1 },
-            });
-          } catch (startupNotificationError) {
-            console.log('Fehler beim Start-Umgebungscheck:', startupNotificationError);
-          }
-        }
-      }
-    }
-  };
 
   const handleAuth = async (type) => {
     if (!email || !password) return;
@@ -1535,6 +1530,7 @@ export default function App() {
               }}
               style={styles.map} 
               showsUserLocation
+              showsMyLocationButton={false}
               followsUserLocation={false}
               region={mapRegion}
             > 
@@ -1587,6 +1583,13 @@ export default function App() {
               );
             })}
           </MapView>
+
+          <TouchableOpacity 
+            style={[styles.myLocationBtn, styles.shadow]} 
+            onPress={goToMyLocation}
+          >
+            <Text style={{fontSize: 24}}>🎯</Text>
+          </TouchableOpacity>
 
           {showReportSuccessToast && (
             <View style={styles.successToast} pointerEvents="none">
@@ -2145,6 +2148,20 @@ const styles = StyleSheet.create({
   infoCard: { position: 'absolute', bottom: 30, left: 20, right: 20, backgroundColor: 'white', padding: 25, borderRadius: 25 },
   infoTitle: { fontWeight: 'bold', fontSize: 20, marginBottom: 5 },
   deleteBtn: { backgroundColor: '#4CAF50', padding: 18, borderRadius: 15, marginTop: 10, alignItems: 'center' },
+  myLocationBtn: {
+    position: 'absolute',
+    top: 20,
+    right: 16,
+    backgroundColor: 'white',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EEE',
+    zIndex: 10,
+  },
   splash: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FDF5E6' },
   authFullContainer: { flex: 1, backgroundColor: 'white' },
   authForm: { flex: 1, padding: 30, justifyContent: 'center' },
