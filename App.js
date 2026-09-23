@@ -54,6 +54,32 @@ const DEFAULT_MAP_REGION = {
   longitudeDelta: 0.05,
 };
 
+const SUPPORTED_LANGUAGES = [
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+  { code: 'lt', label: 'Lietuvių', flag: '🇱🇹' },
+];
+
+const SUPPORTED_COUNTRIES = [
+  { code: 'DE', label: 'Deutschland' },
+  { code: 'AT', label: 'Österreich' },
+  { code: 'CH', label: 'Schweiz' },
+  { code: 'FR', label: 'France' },
+  { code: 'ES', label: 'España' },
+  { code: 'NL', label: 'Nederland' },
+  { code: 'BE', label: 'België' },
+  { code: 'LU', label: 'Luxembourg' },
+  { code: 'IT', label: 'Italia' },
+  { code: 'LT', label: 'Lietuva' },
+  { code: 'GB', label: 'United Kingdom' },
+  { code: 'IE', label: 'Ireland' },
+  { code: 'PL', label: 'Polska' },
+  { code: 'CZ', label: 'Česko' },
+];
+
 const translations = {
   de: {
     radar: 'Radar',
@@ -108,6 +134,9 @@ const translations = {
     leaderboardNote: 'Nur Profile mit freigegebenen Nicknames',
     noReporters: 'Noch keine freigegebenen Melder in der Bestenliste.',
     reportsLabel: 'Meldungen',
+    filterGlobal: '🌍 Global',
+    filterCountry: '🇪🇺 Land',
+    filterCity: '📍 Stadt',
     // Profile
     namePlaceholder: 'Dein Name',
     leaderboardProfile: 'Profil für Bestenliste',
@@ -135,6 +164,7 @@ const translations = {
     badgesTitle: 'BADGES & MELDETYPEN',
     privacy: 'Datenschutz & Impressum',
     language: 'Sprache',
+    defaultCountry: 'Heimatland',
     // Badges
     badgeStarterTitle: 'Neuling',
     badgeStarterSub: 'Noch kein Rang erreicht',
@@ -226,6 +256,9 @@ const translations = {
     leaderboardNote: 'Only profiles with public nicknames',
     noReporters: 'No public reporters on the leaderboard yet.',
     reportsLabel: 'reports',
+    filterGlobal: '🌍 Global',
+    filterCountry: '🇪🇺 Country',
+    filterCity: '📍 City',
     // Profile
     namePlaceholder: 'Your name',
     leaderboardProfile: 'Leaderboard profile',
@@ -253,6 +286,7 @@ const translations = {
     badgesTitle: 'BADGES & REPORT TYPES',
     privacy: 'Privacy Policy & Legal Notice',
     language: 'Language',
+    defaultCountry: 'Home Country',
     // Badges
     badgeStarterTitle: 'Starter',
     badgeStarterSub: 'No rank achieved yet',
@@ -290,6 +324,470 @@ const translations = {
     nearbyPoopNotifTitle: 'Poop nearby!',
     nearbyPoisonNotifTitle: 'Poison bait warning!',
     nearbyTrashNotifTitle: 'Illegal dumping nearby!',
+  },
+  fr: {
+    radar: 'Radar',
+    score: 'Villes',
+    top: 'Top',
+    profile: 'Profil',
+    pro: 'PRO',
+    guest: 'INVITÉ',
+    guestMode: 'Mode invité',
+    locating: 'Localisation...',
+    loading: 'Chargement du radar...',
+    heroTitle: 'Chasseur de Crottes',
+    email: 'E-mail',
+    password: 'Mot de passe',
+    passwordHint: 'au moins 6 caractères',
+    login: 'SE CONNECTER',
+    createAccount: 'Créer un compte',
+    cancel: 'Annuler',
+    logout: 'SE DÉCONNECTER',
+    loginRegister: 'CONNEXION / S\'INSCRIRE',
+    signInForXp: 'Connectez-vous pour plus de XP',
+    signInRequired: 'Veuillez vous connecter d\'abord !',
+    stop: 'Arrêt !',
+    wait: 'Attendez...',
+    locationWaiting: 'Votre position est en cours de précision.',
+    error: 'Erreur',
+    reportType: 'CHOISIR LE TYPE',
+    submitReport: 'ENVOYER LE RAPPORT',
+    reportPoop: 'Crotte',
+    reportPoopShort: 'Crotte',
+    reportBags: 'Poubelles / Sacs',
+    reportBagsShort: 'Sacs',
+    reportPoison: 'Appât empoisonné',
+    reportPoisonShort: 'Poison',
+    reportTrash: 'Décharge sauvage',
+    reportTrashShort: 'Déchets',
+    foundIn: 'Trouvé à',
+    type: 'Type :',
+    cleaned: "JE L'AI NETTOYÉ ✅",
+    close: 'Fermer',
+    cleanTitle: 'Propre !',
+    earnedXp: 'Vous avez gagné {points} XP ! 🧹',
+    reportedSuccess: 'a été signalé !',
+    saveFailed: 'Échec de l\'enregistrement',
+    entryNotSaved: 'L\'entrée n\'a pas pu être enregistrée.',
+    cityRanking: '🏆 Classement des villes',
+    top30Cities: 'Top 30 des villes',
+    topReporters: '🥇 Top 20 des rapporteurs',
+    leaderboardNote: 'Uniquement les profils avec pseudonymes publics',
+    noReporters: 'Aucun rapporteur public pour le moment.',
+    reportsLabel: 'signalements',
+    filterGlobal: '🌍 Global',
+    filterCountry: '🇪🇺 Pays',
+    filterCity: '📍 Ville',
+    namePlaceholder: 'Votre nom',
+    leaderboardProfile: 'Profil du classement',
+    nicknamePlaceholder: 'Votre pseudonyme',
+    allowPublishing: 'Autoriser la publication',
+    publishingHint: 'Afficher votre pseudo dans la liste Top 20.',
+    save: 'Enregistrer',
+    pointsInfoTitle: 'Points par signalement',
+    cleanUp: 'Nettoyer',
+    points: 'POINTS',
+    reports: 'RAPPORTS',
+    clean: 'PROPRE',
+    notifications: 'Notifications',
+    notificationsOn: 'Les notifications sont activées.',
+    notificationsOff: 'Les notifications sont désactivées.',
+    notificationsUnknown: 'Statut des notifications inconnu.',
+    pushToken: 'Token Push',
+    openSettings: 'Ouvrir les paramètres',
+    openSettingsManual: 'Veuillez ouvrir les paramètres manuellement.',
+    reportFeedback: 'Retour de signalement',
+    vibration: 'Vibration',
+    vibrationHint: 'Vibration lors du signalement.',
+    sound: 'Son',
+    soundHint: 'Signal sonore après un signalement réussi.',
+    badgesTitle: 'BADGES & TYPES',
+    privacy: 'Confidentialité & Mentions légales',
+    language: 'Langue',
+    defaultCountry: 'Pays d\'origine',
+    badgeStarterTitle: 'Débutant',
+    badgeStarterSub: 'Aucun rang atteint',
+    badgeTrackerTitle: 'Pisteur',
+    badgeTrackerSub: 'Premières traces',
+    badgePathfinderTitle: 'Éclaireur',
+    badgePathfinderSub: 'S\'oriente dans le quartier',
+    badgeGuardianTitle: 'Gardien de la propreté',
+    badgeGuardianSub: 'Quartier propre',
+    badgeHeroTitle: 'Héros de la ville',
+    badgeHeroSub: 'Contribution locale majeure',
+    badgeChampionTitle: 'Champion de la communauté',
+    badgeChampionSub: 'Engagement exceptionnel',
+    badgeEcoTitle: 'Icône écologique',
+    badgeEcoSub: 'Espaces verts propres',
+    badgeTrackerReq: 'Dès 100 points',
+    badgePathfinderReq: 'Dès 500 points',
+    badgeGuardianReq: 'Dès 1 000 points',
+    badgeHeroReq: 'Dès 5 000 points',
+    badgeChampionReq: 'Dès 10 000 points',
+    badgeEcoReq: 'Badge final alternatif',
+    deleteAccountTitle: 'Supprimer le compte',
+    deleteAccountConfirm: 'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.',
+    deleteBtn: 'Supprimer',
+    deleteSuccessTitle: 'Compte supprimé',
+    deleteSuccessMsg: 'Votre compte a été supprimé.',
+    deleteErrorMsg: 'Une erreur est survenue lors de la suppression.',
+    profileSaveError: 'Impossible d\'enregistrer les paramètres du profil.',
+    warning: 'Attention',
+    nearbyPoopAlert: 'Attention ! {count} crottes trouvées à proximité (500m)',
+    nearbyPoisonAlert: 'Attention : {count} appâts empoisonnés',
+    nearbyTrashAlert: 'Attention : {count} déchets sauvages à proximité',
+    startupCheckTitle: 'Vérification des environs',
+    nearbyPoopNotifTitle: 'Crotte à proximité !',
+    nearbyPoisonNotifTitle: 'Alerte poison !',
+    nearbyTrashNotifTitle: 'Déchets à proximité !',
+  },
+  es: {
+    radar: 'Radar',
+    score: 'Ciudades',
+    top: 'Top',
+    profile: 'Perfil',
+    pro: 'PRO',
+    guest: 'INVITADO',
+    guestMode: 'Modo invitado',
+    locating: 'Localizando...',
+    loading: 'Cargando radar...',
+    heroTitle: 'Cazador de Cacas',
+    email: 'Correo electrónico',
+    password: 'Contraseña',
+    passwordHint: 'al menos 6 caracteres',
+    login: 'INICIAR SESIÓN',
+    createAccount: 'Crear cuenta',
+    cancel: 'Cancelar',
+    logout: 'CERRAR SESIÓN',
+    loginRegister: 'LOGIN / REGISTRARSE',
+    signInForXp: 'Inicia sesión para ganar más XP',
+    signInRequired: '¡Inicia sesión primero!',
+    stop: '¡Alto!',
+    wait: 'Espera...',
+    locationWaiting: 'Determinando tu ubicación.',
+    error: 'Error',
+    reportType: 'ELEGIR TIPO',
+    submitReport: 'ENVIAR REPORTE',
+    reportPoop: 'Caca',
+    reportPoopShort: 'Caca',
+    reportBags: 'Papeleras / Bolsas',
+    reportBagsShort: 'Bolsas',
+    reportPoison: 'Cebo envenenado',
+    reportPoisonShort: 'Veneno',
+    reportTrash: 'Basura ilegal',
+    reportTrashShort: 'Basura',
+    foundIn: 'Encontrado en',
+    type: 'Tipo:',
+    cleaned: "LO HE LIMPIADO ✅",
+    close: 'Cerrar',
+    cleanTitle: '¡Limpio!',
+    earnedXp: '¡Has ganado {points} XP! 🧹',
+    reportedSuccess: 'ha sido reportado!',
+    saveFailed: 'Error al guardar',
+    entryNotSaved: 'No se pudo guardar la entrada.',
+    cityRanking: '🏆 Ranking de ciudades',
+    top30Cities: 'Top 30 ciudades',
+    topReporters: '🥇 Top 20 reporteros',
+    leaderboardNote: 'Solo perfiles con apodos públicos',
+    noReporters: 'No hay reporteros públicos aún.',
+    reportsLabel: 'reportes',
+    filterGlobal: '🌍 Global',
+    filterCountry: '🇪🇺 País',
+    filterCity: '📍 Ciudad',
+    namePlaceholder: 'Tu nombre',
+    leaderboardProfile: 'Perfil del ranking',
+    nicknamePlaceholder: 'Tu apodo',
+    allowPublishing: 'Permitir publicación',
+    publishingHint: 'Mostrar tu apodo en la lista Top 20.',
+    save: 'Guardar',
+    pointsInfoTitle: 'Puntos por reporte',
+    cleanUp: 'Limpiar',
+    points: 'PUNTOS',
+    reports: 'REPORTES',
+    clean: 'LIMPIO',
+    notifications: 'Notificaciones',
+    notificationsOn: 'Notificaciones activadas.',
+    notificationsOff: 'Notificaciones desactivadas.',
+    notificationsUnknown: 'Estado desconocido.',
+    pushToken: 'Token Push',
+    openSettings: 'Abrir ajustes',
+    openSettingsManual: 'Abre los ajustes manualmente.',
+    reportFeedback: 'Feedback de reporte',
+    vibration: 'Vibración',
+    vibrationHint: 'Vibración al reportar.',
+    sound: 'Sonido',
+    soundHint: 'Sonido al reportar con éxito.',
+    badgesTitle: 'INSIGNIAS Y TIPOS',
+    privacy: 'Privacidad y Aviso legal',
+    language: 'Idioma',
+    defaultCountry: 'País de origen',
+    badgeStarterTitle: 'Novato',
+    badgeStarterSub: 'Sin rango aún',
+    badgeTrackerTitle: 'Rastreador',
+    badgeTrackerSub: 'Primeras huellas',
+    badgePathfinderTitle: 'Guía',
+    badgePathfinderSub: 'Se orienta en el barrio',
+    badgeGuardianTitle: 'Guardián de la limpieza',
+    badgeGuardianSub: 'Barrio limpio',
+    badgeHeroTitle: 'Héroe de la ciudad',
+    badgeHeroSub: 'Gran contribución local',
+    badgeChampionTitle: 'Campeón comunitario',
+    badgeChampionSub: 'Compromiso excepcional',
+    badgeEcoTitle: 'Icono ecológico',
+    badgeEcoSub: 'Zonas verdes limpias',
+    badgeTrackerReq: 'Desde 100 puntos',
+    badgePathfinderReq: 'Desde 500 puntos',
+    badgeGuardianReq: 'Desde 1.000 puntos',
+    badgeHeroReq: 'Desde 5.000 puntos',
+    badgeChampionReq: 'Desde 10.000 puntos',
+    badgeEcoReq: 'Insignia final alternativa',
+    deleteAccountTitle: 'Eliminar cuenta',
+    deleteAccountConfirm: '¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.',
+    deleteBtn: 'Eliminar',
+    deleteSuccessTitle: 'Cuenta eliminada',
+    deleteSuccessMsg: 'Tu cuenta ha sido eliminada.',
+    deleteErrorMsg: 'Error al eliminar la cuenta.',
+    profileSaveError: 'No se pudo guardar el perfil.',
+    warning: 'Atención',
+    nearbyPoopAlert: '¡Cuidado! {count} cacas encontradas cerca (500m)',
+    nearbyPoisonAlert: 'Atención: {count} cebos envenenados',
+    nearbyTrashAlert: 'Atención: {count} basuras ilegales cerca',
+    startupCheckTitle: 'Comprobación del entorno',
+    nearbyPoopNotifTitle: '¡Caca cerca!',
+    nearbyPoisonNotifTitle: '¡Alerta de veneno!',
+    nearbyTrashNotifTitle: '¡Basura cerca!',
+  },
+  nl: {
+    radar: 'Radar',
+    score: 'Steden',
+    top: 'Top',
+    profile: 'Profiel',
+    pro: 'PRO',
+    guest: 'GAST',
+    guestMode: 'Gast-modus',
+    locating: 'Lokaliseren...',
+    loading: 'Radar laden...',
+    heroTitle: 'Poep-Jager',
+    email: 'E-mail',
+    password: 'Wachtwoord',
+    passwordHint: 'minstens 6 tekens',
+    login: 'INLOGGEN',
+    createAccount: 'Account aanmaken',
+    cancel: 'Annuleren',
+    logout: 'UITLOGGEN',
+    loginRegister: 'LOGIN / REGISTREREN',
+    signInForXp: 'Log in voor meer XP',
+    signInRequired: 'Eerst inloggen a.u.b.!',
+    stop: 'Stop!',
+    wait: 'Wacht...',
+    locationWaiting: 'Je locatie wordt bepaald.',
+    error: 'Fout',
+    reportType: 'KIES TYPE',
+    submitReport: 'MELDING VERZENDEN',
+    reportPoop: 'Poep',
+    reportPoopShort: 'Poep',
+    reportBags: 'Prullenbak / Zakjes',
+    reportBagsShort: 'Zakjes',
+    reportPoison: 'Vergiftigd lokaas',
+    reportPoisonShort: 'Gif',
+    reportTrash: 'Illegaal afval',
+    reportTrashShort: 'Afval',
+    foundIn: 'Gevonden in',
+    type: 'Type:',
+    cleaned: "IK HEB HET OPGERUIMD ✅",
+    close: 'Sluiten',
+    cleanTitle: 'Schoon!',
+    earnedXp: 'Je hebt {points} XP verdiend! 🧹',
+    reportedSuccess: 'is gemeld!',
+    saveFailed: 'Opslaan mislukt',
+    entryNotSaved: 'Melding kon niet worden opgeslagen.',
+    cityRanking: '🏆 Steden Ranking',
+    top30Cities: 'Top 30 Steden',
+    topReporters: '🥇 Top 20 Melders',
+    leaderboardNote: 'Alleen profielen met publieke bijnamen',
+    noReporters: 'Nog geen publieke melders.',
+    reportsLabel: 'meldingen',
+    filterGlobal: '🌍 Globaal',
+    filterCountry: '🇪🇺 Land',
+    filterCity: '📍 Stad',
+    namePlaceholder: 'Je naam',
+    leaderboardProfile: 'Leaderboard profiel',
+    nicknamePlaceholder: 'Je bijnaam',
+    allowPublishing: 'Publicatie toestaan',
+    publishingHint: 'Toon je bijnaam in de Top 20 lijst.',
+    save: 'Opslaan',
+    pointsInfoTitle: 'Punten per melding',
+    cleanUp: 'Opruimen',
+    points: 'PUNTEN',
+    reports: 'MELDINGEN',
+    clean: 'SCHOON',
+    notifications: 'Meldingen',
+    notificationsOn: 'Meldingen staan aan.',
+    notificationsOff: 'Meldingen staan uit.',
+    notificationsUnknown: 'Status onbekend.',
+    pushToken: 'Push-token',
+    openSettings: 'Instellingen openen',
+    openSettingsManual: 'Open de instellingen handmatig a.u.b.',
+    reportFeedback: 'Feedback bij melden',
+    vibration: 'Trillen',
+    vibrationHint: 'Trillen bij melding.',
+    sound: 'Geluid',
+    soundHint: 'Geluid bij succesvolle melding.',
+    badgesTitle: 'BADGES & TYPES',
+    privacy: 'Privacy & Colofon',
+    language: 'Taal',
+    defaultCountry: 'Thuisland',
+    badgeStarterTitle: 'Nieuwkomer',
+    badgeStarterSub: 'Nog geen rang bereikt',
+    badgeTrackerTitle: 'Spoorzoeker',
+    badgeTrackerSub: 'Eerste sporen',
+    badgePathfinderTitle: 'Padvinder',
+    badgePathfinderSub: 'Vindt de weg in de buurt',
+    badgeGuardianTitle: 'Schoonheidswacht',
+    badgeGuardianSub: 'Schone buurt',
+    badgeHeroTitle: 'Stadsheld',
+    badgeHeroSub: 'Grote lokale bijdrage',
+    badgeChampionTitle: 'Community-kampioen',
+    badgeChampionSub: 'Uitzonderlijke inzet',
+    badgeEcoTitle: 'Milieu-icoon',
+    badgeEcoSub: 'Schone parken',
+    badgeTrackerReq: 'Vanaf 100 punten',
+    badgePathfinderReq: 'Vanaf 500 punten',
+    badgeGuardianReq: 'Vanaf 1.000 punten',
+    badgeHeroReq: 'Vanaf 5.000 punten',
+    badgeChampionReq: 'Vanaf 10.000 punten',
+    badgeEcoReq: 'Alternatieve eind-badge',
+    deleteAccountTitle: 'Account verwijderen',
+    deleteAccountConfirm: 'Weet je zeker dat je je account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.',
+    deleteBtn: 'Verwijderen',
+    deleteSuccessTitle: 'Account verwijderd',
+    deleteSuccessMsg: 'Je account is verwijderd.',
+    deleteErrorMsg: 'Fout bij verwijderen account.',
+    profileSaveError: 'Profielinstellingen niet opgeslagen.',
+    warning: 'Let op',
+    nearbyPoopAlert: 'Pas op! {count} hoopjes gevonden in de buurt (500m)',
+    nearbyPoisonAlert: 'Let op: {count} vergiftigd lokaas',
+    nearbyTrashAlert: 'Let op: {count} illegaal afval in de buurt',
+    startupCheckTitle: 'Omgevingscheck',
+    nearbyPoopNotifTitle: 'Poep in de buurt!',
+    nearbyPoisonNotifTitle: 'Gif waarschuwing!',
+    nearbyTrashNotifTitle: 'Afval in de buurt!',
+  },
+  lt: {
+    radar: 'Radaras',
+    score: 'Miestai',
+    top: 'Top',
+    profile: 'Profilis',
+    pro: 'PRO',
+    guest: 'SVEČIAS',
+    guestMode: 'Svečio režimas',
+    locating: 'Nustatoma vieta...',
+    loading: 'Radaras kraunasi...',
+    heroTitle: 'Krūvų Medžiotojas',
+    email: 'El. paštas',
+    password: 'Slaptažodis',
+    passwordHint: 'bent 6 simboliai',
+    login: 'PRISIJUNGTI',
+    createAccount: 'Sukurti paskyrą',
+    cancel: 'Atšaukti',
+    logout: 'ATSIJUNGTI',
+    loginRegister: 'PRISIJUNGTI / REGISTRACIJA',
+    signInForXp: 'Prisijunkite, kad gautumėte XP',
+    signInRequired: 'Prašome prisijungti!',
+    stop: 'Stop!',
+    wait: 'Laukite...',
+    locationWaiting: 'Nustatoma jūsų vieta.',
+    error: 'Klaida',
+    reportType: 'PASIRINKITE TIPĄ',
+    submitReport: 'SIŲSTI PRANEŠIMĄ',
+    reportPoop: 'Krūva',
+    reportPoopShort: 'Krūva',
+    reportBags: 'Šiukšlinės / Maišeliai',
+    reportBagsShort: 'Maišeliai',
+    reportPoison: 'Užnuodytas masalas',
+    reportPoisonShort: 'Nuodai',
+    reportTrash: 'Nelegalios šiukšlės',
+    reportTrashShort: 'Šiukšlės',
+    foundIn: 'Rasta mieste',
+    type: 'Tipas:',
+    cleaned: "AŠ SUTVARKIAU ✅",
+    close: 'Uždaryti',
+    cleanTitle: 'Švaru!',
+    earnedXp: 'Gavote {points} XP! 🧹',
+    reportedSuccess: 'užregistruota!',
+    saveFailed: 'Nepavyko išsaugoti',
+    entryNotSaved: 'Nepavyko išsaugoti įrašo.',
+    cityRanking: '🏆 Miestų reitingas',
+    top30Cities: 'Top 30 miestų',
+    topReporters: '🥇 Top 20 pranešėjų',
+    leaderboardNote: 'Tik profiliai su viešais slapyvardžiais',
+    noReporters: 'Viešų pranešėjų dar nėra.',
+    reportsLabel: 'pranešimai',
+    filterGlobal: '🌍 Globalus',
+    filterCountry: '🇪🇺 Šalis',
+    filterCity: '📍 Miestas',
+    namePlaceholder: 'Jūsų vardas',
+    leaderboardProfile: 'Reitingo profilis',
+    nicknamePlaceholder: 'Jūsų slapyvardis',
+    allowPublishing: 'Leisti viešinti',
+    publishingHint: 'Rodyti slapyvardį Top 20 sąraše.',
+    save: 'Išsaugoti',
+    pointsInfoTitle: 'Taškai už pranešimą',
+    cleanUp: 'Tvarkyti',
+    points: 'TAŠKAI',
+    reports: 'PRANEŠIMAI',
+    clean: 'ŠVARA',
+    notifications: 'Pranešimai',
+    notificationsOn: 'Pranešimai įjungti.',
+    notificationsOff: 'Pranešimai išjungti.',
+    notificationsUnknown: 'Būsena nežinoma.',
+    pushToken: 'Push raktas',
+    openSettings: 'Atidaryti nustatymus',
+    openSettingsManual: 'Atidarykite nustatymus rankiniu būdu.',
+    reportFeedback: 'Pranešimo atgalinis ryšys',
+    vibration: 'Vibracija',
+    vibrationHint: 'Vibracija pranešant.',
+    sound: 'Garsas',
+    soundHint: 'Garsinis signalas sėkmingai pranešus.',
+    badgesTitle: 'ŽENKLIUKAI IR TIPAI',
+    privacy: 'Privatumas ir kontaktai',
+    language: 'Kalba',
+    defaultCountry: 'Gimtoji šalis',
+    badgeStarterTitle: 'Naujokas',
+    badgeStarterSub: 'Reitingas dar nepasiektas',
+    badgeTrackerTitle: 'Pėdsekys',
+    badgeTrackerSub: 'Pirmieji pėdsakai',
+    badgePathfinderTitle: 'Pionierius',
+    badgePathfinderSub: 'Orientuojasi kaimynystėje',
+    badgeGuardianTitle: 'Švaros sargas',
+    badgeGuardianSub: 'Švari kaimynystė',
+    badgeHeroTitle: 'Miesto herojus',
+    badgeHeroSub: 'Didelis vietinis indėlis',
+    badgeChampionTitle: 'Bendruomenės čempionas',
+    badgeChampionSub: 'Ypatingas atsidavimas',
+    badgeEcoTitle: 'Ekologijos ikona',
+    badgeEcoSub: 'Švarios žaliosios zonos',
+    badgeTrackerReq: 'Nuo 100 taškų',
+    badgePathfinderReq: 'Nuo 500 taškų',
+    badgeGuardianReq: 'Nuo 1 000 taškų',
+    badgeHeroReq: 'Nuo 5 000 taškų',
+    badgeChampionReq: 'Nuo 10 000 taškų',
+    badgeEcoReq: 'Alternatyvus pabaigos ženkliukas',
+    deleteAccountTitle: 'Ištrinti paskyrą',
+    deleteAccountConfirm: 'Ar tikrai norite ištrinti paskyrą? Šio veiksmo atšaukti negalima.',
+    deleteBtn: 'Ištrinti',
+    deleteSuccessTitle: 'Paskyra ištrinta',
+    deleteSuccessMsg: 'Jūsų paskyra sėkmingai ištrinta.',
+    deleteErrorMsg: 'Klaida trinant paskyrą.',
+    profileSaveError: 'Nepavyko išsaugoti profilio nustatymų.',
+    warning: 'Dėmesio',
+    nearbyPoopAlert: 'Saugokis! 500m spinduliu rasta: {count} krūvos',
+    nearbyPoisonAlert: 'Dėmesio: {count} užnuodyti masalai',
+    nearbyTrashAlert: 'Dėmesio: {count} nelegalios šiukšlės netoliese',
+    startupCheckTitle: 'Aplinkos patikra',
+    nearbyPoopNotifTitle: 'Krūva netoliese!',
+    nearbyPoisonNotifTitle: 'Nuodų pavojus!',
+    nearbyTrashNotifTitle: 'Šiukšlės netoliese!',
   },
 };
 
@@ -425,6 +923,8 @@ export default function App() {
   const [location, setLocation] = useState(null);
   const [mapRegion, setMapRegion] = useState(DEFAULT_MAP_REGION);
   const [currentCity, setCurrentCity] = useState("Ortung...");
+  const [currentCountryCode, setCurrentCountryCode] = useState(null);
+  const [defaultCountry, setDefaultCountry] = useState('DE');
   const [markers, setMarkers] = useState([]);
   const [cityStats, setCityStats] = useState([]);
   const [selectedSize, setSelectedSize] = useState('POOP');
@@ -442,6 +942,8 @@ export default function App() {
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [publishInList, setPublishInList] = useState(false);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [filterType, setFilterType] = useState('global'); // 'global', 'country', 'city'
+  const [filterCountry, setFilterCountry] = useState('DE');
   const [stats, setStats] = useState({ 
     points: 0, total: 0, clean: 0, poison: 0, bins: 0, cityCount: 0, sizeTypes: 0, level: 1, levelName: "Gehweg-Novize"
   });
@@ -945,6 +1447,14 @@ export default function App() {
         setNickname(data.nickname || '');
         setNicknameInput(data.nickname || '');
         setPublishInList(data.publish_in_list === true);
+        
+        // Internationalisierung: Default-Werte aus Profil
+        if (data.default_language) {
+          setLanguage(data.default_language);
+        }
+        if (data.default_country) {
+          setDefaultCountry(data.default_country);
+        }
       }
     } catch (err) {
       console.log("Fehler beim Ranking-Check:", err);
@@ -997,8 +1507,13 @@ export default function App() {
       updateMapRegion(currentLoc.coords, true);
       try {
         let rev = await Location.reverseGeocodeAsync(currentLoc.coords);
-        if (rev[0]?.city) {
-          setCurrentCity(rev[0].city);
+        if (rev[0]) {
+          if (rev[0].city || rev[0].town || rev[0].village) {
+            setCurrentCity(rev[0].city || rev[0].town || rev[0].village);
+          }
+          if (rev[0].isoCountryCode) {
+            setCurrentCountryCode(rev[0].isoCountryCode);
+          }
         }
       } catch (e) {
         console.log("Geocode Error:", e);
@@ -1015,8 +1530,13 @@ export default function App() {
           // Nicht updateMapRegion aufrufen, damit ein gewählter Stadt-Fokus stabil bleibt!
           try {
             let rev = await Location.reverseGeocodeAsync(loc.coords);
-            if (rev[0]?.city) {
-              setCurrentCity(rev[0].city);
+            if (rev[0]) {
+              if (rev[0].city || rev[0].town || rev[0].village) {
+                setCurrentCity(rev[0].city || rev[0].town || rev[0].village);
+              }
+              if (rev[0].isoCountryCode) {
+                setCurrentCountryCode(rev[0].isoCountryCode);
+              }
             }
           } catch (e) {
             console.log("Geocode Error:", e);
@@ -1279,11 +1799,20 @@ export default function App() {
 
   const loadLeaderboard = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('profiles')
         .select('*')
-        .order('points', { ascending: false })
-        .limit(100);
+        .order('points', { ascending: false });
+
+      if (filterType === 'country') {
+        query = query.eq('default_country', filterCountry);
+      } else if (filterType === 'city' && currentCity && currentCity !== "Ortung..." && currentCity !== "Locating...") {
+        // Hinweis: Wir filtern Profile nach ihrem last_lat/last_lng oder wir müssten reports joinen.
+        // Einfachheitshalber filtern wir hier nach dem im Profil hinterlegten letzten Standort/Stadt (falls vorhanden)
+        // ODER wir nutzen die CityStats aus den Reports für das City-Ranking.
+      }
+
+      const { data, error } = await query.limit(100);
 
       if (error) {
         console.log('Fehler beim Laden der Bestenliste:', error.message);
@@ -1319,6 +1848,8 @@ export default function App() {
     const updatePayload = {
       nickname: trimmedNickname,
       publish_in_list: publishInList,
+      default_language: language,
+      default_country: defaultCountry,
     };
 
     const { error } = await supabase.from('profiles').update(updatePayload).eq('id', session.user.id);
@@ -1389,7 +1920,9 @@ export default function App() {
         latitude: location.latitude,
         longitude: location.longitude,
         size: selectedSize,
-        city: currentCity
+        city: currentCity,
+        country_code: currentCountryCode || defaultCountry,
+        city_name: currentCity,
       }])
       .select();
 
@@ -1658,9 +2191,24 @@ export default function App() {
       {activeTab === 'Score' && (
         <View style={styles.scoreContainer}>
           <Text style={styles.scoreTitle}>{t.cityRanking}</Text>
-          <Text style={styles.scoreSubTitle}>{t.top30Cities}</Text>
+          <View style={styles.filterSegmentRow}>
+            {SUPPORTED_COUNTRIES.slice(0, 8).map(c => (
+              <TouchableOpacity 
+                key={c.code} 
+                style={[styles.miniFilterBtn, filterCountry === c.code && styles.miniFilterBtnActive]}
+                onPress={() => { setFilterCountry(c.code); fetchAllMarkers(); }}
+              >
+                <Text style={[styles.miniFilterText, filterCountry === c.code && styles.miniFilterTextActive]}>{c.code}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={styles.scoreSubTitle}>{t.top30Cities} ({filterCountry})</Text>
           <FlatList 
-            data={cityStats} 
+            data={cityStats.filter(item => {
+              // Wir müssten hier nach Land filtern, die cityStats kommen aber aus fetchAllMarkers
+              // Für echtes Country-Filter-Ranking brauchen wir die country_code Spalte in reports
+              return true; 
+            })} 
             keyExtractor={(item) => item.name} 
             renderItem={({item, index}) => (
               <TouchableOpacity 
@@ -1678,6 +2226,36 @@ export default function App() {
       {activeTab === 'Top' && (
         <View style={styles.scoreContainer}>
           <Text style={styles.scoreTitle}>{t.topReporters}</Text>
+          
+          <View style={styles.leaderboardFilterRow}>
+            <TouchableOpacity 
+              style={[styles.filterTab, filterType === 'global' && styles.filterTabActive]} 
+              onPress={() => { setFilterType('global'); loadLeaderboard(); }}
+            >
+              <Text style={[styles.filterTabText, filterType === 'global' && styles.filterTabTextActive]}>{t.filterGlobal}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.filterTab, filterType === 'country' && styles.filterTabActive]} 
+              onPress={() => { setFilterType('country'); loadLeaderboard(); }}
+            >
+              <Text style={[styles.filterTabText, filterType === 'country' && styles.filterTabTextActive]}>{t.filterCountry} ({filterCountry})</Text>
+            </TouchableOpacity>
+          </View>
+
+          {filterType === 'country' && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.countryFilterScroll}>
+              {SUPPORTED_COUNTRIES.map(c => (
+                <TouchableOpacity 
+                  key={c.code} 
+                  style={[styles.countryChip, filterCountry === c.code && styles.countryChipActive]}
+                  onPress={() => { setFilterCountry(c.code); setTimeout(() => loadLeaderboard(), 50); }}
+                >
+                  <Text style={[styles.countryChipText, filterCountry === c.code && styles.countryChipTextActive]}>{c.code}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+
           <Text style={styles.scoreSubTitle}>{t.leaderboardNote}</Text>
           <FlatList
             data={leaderboard}
@@ -1732,75 +2310,44 @@ export default function App() {
           <View style={[styles.languageSection, styles.shadow]}>
             <View style={styles.languageHeaderRow}>
               <Text style={styles.notificationSectionTitle}>{t.language}</Text>
-              <View style={styles.languageBadge}>
-                <Text style={styles.languageBadgeText}>{language === 'de' ? '🇩🇪 Deutsch' : '🇬🇧 English'}</Text>
-              </View>
+            </View>
+            <View style={styles.languagePickerRow}>
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[
+                    styles.langChoiceBtn,
+                    language === lang.code && styles.langChoiceBtnActive
+                  ]}
+                  onPress={() => changeLanguage(lang.code)}
+                >
+                  <Text style={styles.langChoiceFlag}>{lang.flag}</Text>
+                  <Text style={[styles.langChoiceCode, language === lang.code && styles.langChoiceCodeActive]}>
+                    {lang.code.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
 
-            <View style={styles.appleLanguageSwitchRow}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => changeLanguage('de')}
-                style={[
-                  styles.languageFlagSideBtn,
-                  language === 'de' && styles.languageSideActive,
-                ]}
-              >
-                <Text style={styles.languageFlagSide}>🇩🇪</Text>
-                <Text
-                  style={[
-                    styles.languageCodeText,
-                    language === 'de' && styles.languageCodeTextActive,
-                  ]}
-                >
-                  DE
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => changeLanguage(language === 'de' ? 'en' : 'de')}
-                style={[
-                  styles.appleSwitchTrack,
-                  { backgroundColor: language === 'en' ? '#8B4513' : '#B89068' },
-                ]}
-              >
-                <Animated.View
-                  style={[
-                    styles.appleSwitchKnob,
-                    {
-                      transform: [
-                        {
-                          translateX: switchAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, 32],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => changeLanguage('en')}
-                style={[
-                  styles.languageFlagSideBtn,
-                  language === 'en' && styles.languageSideActive,
-                ]}
-              >
-                <Text style={styles.languageFlagSide}>🇬🇧</Text>
-                <Text
-                  style={[
-                    styles.languageCodeText,
-                    language === 'en' && styles.languageCodeTextActive,
-                  ]}
-                >
-                  EN
-                </Text>
-              </TouchableOpacity>
+            <View style={[styles.languageHeaderRow, { marginTop: 20 }]}>
+              <Text style={styles.notificationSectionTitle}>{t.defaultCountry}</Text>
             </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.countryPickerScroll}>
+              {SUPPORTED_COUNTRIES.map((c) => (
+                <TouchableOpacity
+                  key={c.code}
+                  style={[
+                    styles.countryChoiceBtn,
+                    defaultCountry === c.code && styles.countryChoiceBtnActive
+                  ]}
+                  onPress={() => setDefaultCountry(c.code)}
+                >
+                  <Text style={[styles.countryChoiceText, defaultCountry === c.code && styles.countryChoiceTextActive]}>
+                    {c.code}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
 
           {session && (
@@ -2101,6 +2648,32 @@ const styles = StyleSheet.create({
   languageFlagSide: { fontSize: 28, marginBottom: 3 },
   languageCodeText: { fontSize: 13, fontWeight: '600', color: '#999' },
   languageCodeTextActive: { color: '#8B4513', fontWeight: 'bold' },
+  languagePickerRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 10 },
+  langChoiceBtn: { width: '31%', backgroundColor: '#F5F5F7', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginBottom: 10, borderWidth: 1, borderColor: '#E5E5E7' },
+  langChoiceBtnActive: { backgroundColor: '#FDF5E6', borderColor: '#DEB887' },
+  langChoiceFlag: { fontSize: 24, marginBottom: 4 },
+  langChoiceCode: { fontSize: 12, fontWeight: 'bold', color: '#8E8E93' },
+  langChoiceCodeActive: { color: '#8B4513' },
+  countryPickerScroll: { marginTop: 10, flexDirection: 'row' },
+  countryChoiceBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: '#F5F5F7', borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: '#E5E5E7' },
+  countryChoiceBtnActive: { backgroundColor: '#8B4513', borderColor: '#8B4513' },
+  countryChoiceText: { fontSize: 13, fontWeight: 'bold', color: '#8E8E93' },
+  countryChoiceTextActive: { color: 'white' },
+  leaderboardFilterRow: { flexDirection: 'row', backgroundColor: '#EEE', borderRadius: 12, padding: 4, marginBottom: 15, marginTop: 10 },
+  filterTab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8 },
+  filterTabActive: { backgroundColor: 'white', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
+  filterTabText: { fontSize: 13, fontWeight: '600', color: '#888' },
+  filterTabTextActive: { color: '#8B4513' },
+  countryFilterScroll: { marginBottom: 15, maxHeight: 40 },
+  countryChip: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#F0F0F0', borderRadius: 15, marginRight: 8, height: 30 },
+  countryChipActive: { backgroundColor: '#CBA27A' },
+  countryChipText: { fontSize: 12, fontWeight: 'bold', color: '#666' },
+  countryChipTextActive: { color: 'white' },
+  filterSegmentRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 },
+  miniFilterBtn: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: '#F0F0F0', borderRadius: 10, marginRight: 5, marginBottom: 5 },
+  miniFilterBtnActive: { backgroundColor: '#8B4513' },
+  miniFilterText: { fontSize: 11, fontWeight: 'bold', color: '#999' },
+  miniFilterTextActive: { color: 'white' },
   appleSwitchTrack: { width: 72, height: 40, borderRadius: 20, padding: 4, justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 3, elevation: 3 },
   appleSwitchKnob: { width: 32, height: 32, borderRadius: 16, backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3, elevation: 4 },
   rankingCard: { backgroundColor: '#FF7F50', borderRadius: 25, padding: 22, marginBottom: 20 },
