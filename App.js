@@ -59,26 +59,40 @@ const SUPPORTED_LANGUAGES = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'fr', label: 'Français', flag: '🇫🇷' },
   { code: 'es', label: 'Español', flag: '🇪🇸' },
-  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹' },
+  { code: 'pl', label: 'Polski', flag: '🇵🇱' },
+  { code: 'lv', label: 'Latviešu', flag: '🇱🇻' },
   { code: 'lt', label: 'Lietuvių', flag: '🇱🇹' },
 ];
 
+const SUPPORTED_LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((lang) => lang.code);
+
 const SUPPORTED_COUNTRIES = [
-  { code: 'DE', label: 'Deutschland' },
-  { code: 'AT', label: 'Österreich' },
-  { code: 'CH', label: 'Schweiz' },
-  { code: 'FR', label: 'France' },
-  { code: 'ES', label: 'España' },
-  { code: 'NL', label: 'Nederland' },
-  { code: 'BE', label: 'België' },
-  { code: 'LU', label: 'Luxembourg' },
-  { code: 'IT', label: 'Italia' },
-  { code: 'LT', label: 'Lietuva' },
-  { code: 'GB', label: 'United Kingdom' },
-  { code: 'IE', label: 'Ireland' },
-  { code: 'PL', label: 'Polska' },
-  { code: 'CZ', label: 'Česko' },
+  { code: 'DE', label: 'Deutschland', flag: '🇩🇪' },
+  { code: 'AT', label: 'Österreich', flag: '🇦🇹' },
+  { code: 'CH', label: 'Schweiz', flag: '🇨🇭' },
+  { code: 'FR', label: 'France', flag: '🇫🇷' },
+  { code: 'ES', label: 'España', flag: '🇪🇸' },
+  { code: 'NL', label: 'Nederland', flag: '🇳🇱' },
+  { code: 'BE', label: 'België', flag: '🇧🇪' },
+  { code: 'LU', label: 'Luxembourg', flag: '🇱🇺' },
+  { code: 'IT', label: 'Italia', flag: '🇮🇹' },
+  { code: 'LT', label: 'Lietuva', flag: '🇱🇹' },
+  { code: 'GB', label: 'United Kingdom', flag: '🇬🇧' },
+  { code: 'IE', label: 'Ireland', flag: '🇮🇪' },
+  { code: 'PL', label: 'Polska', flag: '🇵🇱' },
+  { code: 'CZ', label: 'Česko', flag: '🇨🇿' },
+  { code: 'LV', label: 'Latvija', flag: '🇱🇻' },
 ];
+
+const getCountryMetaByCode = (countryCode) => {
+  const normalizedCode = String(countryCode || '').toUpperCase();
+  return SUPPORTED_COUNTRIES.find((country) => country.code === normalizedCode) || {
+    code: normalizedCode || '--',
+    label: normalizedCode || 'Unknown',
+    flag: '🏳️',
+  };
+};
 
 const translations = {
   de: {
@@ -791,6 +805,160 @@ const translations = {
   },
 };
 
+const withEnglishFallback = (overrides) => ({
+  ...translations.en,
+  ...overrides,
+});
+
+translations.it = withEnglishFallback({
+  score: 'Città',
+  profile: 'Profilo',
+  guestMode: 'Modalità ospite',
+  loading: 'Caricamento radar...',
+  heroTitle: 'Cacciatore di Cacca',
+  createAccount: 'Crea account',
+  signInForXp: 'Accedi per ottenere più XP',
+  signInRequired: 'Accedi prima!',
+  locationWaiting: 'La tua posizione è ancora in fase di precisione.',
+  reportType: 'SCEGLI TIPO SEGNALAZIONE',
+  submitReport: 'INVIA SEGNALAZIONE',
+  reportBags: 'Cestini / Sacchetti',
+  reportPoison: 'Esca avvelenata',
+  reportTrash: 'Rifiuti illegali',
+  foundIn: 'Trovato a',
+  cleaned: 'HO PULITO ✅',
+  cleanTitle: 'Pulito!',
+  reportedSuccess: 'è stato segnalato!',
+  cityRanking: '🏆 Classifica città',
+  top30Cities: 'Top 30 città',
+  topReporters: '🥇 Top 20 segnalatori',
+  leaderboardNote: 'Solo profili con nickname pubblici',
+  reportsLabel: 'segnalazioni',
+  filterCountry: '🇪🇺 Paese',
+  namePlaceholder: 'Il tuo nome',
+  leaderboardProfile: 'Profilo classifica',
+  nicknamePlaceholder: 'Il tuo nickname',
+  allowPublishing: 'Consenti pubblicazione',
+  publishingHint: 'Mostra il tuo nickname nella Top 20.',
+  pointsInfoTitle: 'Punti per segnalazione',
+  cleanUp: 'Pulizia',
+  reports: 'SEGNALAZIONI',
+  notifications: 'Notifiche',
+  openSettings: 'Apri impostazioni',
+  reportFeedback: 'Feedback segnalazione',
+  vibration: 'Vibrazione',
+  sound: 'Suono',
+  badgesTitle: 'BADGE E TIPI DI SEGNALAZIONE',
+  privacy: 'Privacy e note legali',
+  language: 'Lingua',
+  defaultCountry: 'Paese di origine',
+  deleteAccountTitle: 'Elimina account',
+  deleteBtn: 'Elimina',
+  warning: 'Attenzione',
+  nearbyPoisonNotifTitle: 'Allerta esca avvelenata!',
+  nearbyTrashNotifTitle: 'Rifiuti illegali nelle vicinanze!',
+});
+
+translations.pl = withEnglishFallback({
+  score: 'Miasta',
+  profile: 'Profil',
+  guestMode: 'Tryb gościa',
+  loading: 'Ładowanie radaru...',
+  heroTitle: 'Łowca Kup',
+  createAccount: 'Utwórz konto',
+  signInForXp: 'Zaloguj się, aby zdobywać więcej XP',
+  signInRequired: 'Najpierw się zaloguj!',
+  locationWaiting: 'Twoja lokalizacja jest jeszcze doprecyzowywana.',
+  reportType: 'WYBIERZ TYP ZGŁOSZENIA',
+  submitReport: 'WYŚLIJ ZGŁOSZENIE',
+  reportPoop: 'Kupa',
+  reportBags: 'Kosze / Woreczki',
+  reportPoison: 'Trutka',
+  reportTrash: 'Nielegalne odpady',
+  foundIn: 'Znaleziono w',
+  cleaned: 'POSPRZĄTAŁEM ✅',
+  cleanTitle: 'Czysto!',
+  reportedSuccess: 'zostało zgłoszone!',
+  cityRanking: '🏆 Ranking miast',
+  top30Cities: 'Top 30 miast',
+  topReporters: '🥇 Top 20 zgłaszających',
+  leaderboardNote: 'Tylko profile z publicznymi nickami',
+  reportsLabel: 'zgłoszeń',
+  filterCountry: '🇪🇺 Kraj',
+  namePlaceholder: 'Twoje imię',
+  leaderboardProfile: 'Profil rankingu',
+  nicknamePlaceholder: 'Twój nick',
+  allowPublishing: 'Zezwól na publikację',
+  publishingHint: 'Pokaż swój nick na liście Top 20.',
+  pointsInfoTitle: 'Punkty za zgłoszenie',
+  cleanUp: 'Sprzątanie',
+  reports: 'ZGŁOSZENIA',
+  notifications: 'Powiadomienia',
+  openSettings: 'Otwórz ustawienia',
+  reportFeedback: 'Feedback zgłoszenia',
+  vibration: 'Wibracja',
+  sound: 'Dźwięk',
+  badgesTitle: 'ODZNAKI I TYPY ZGŁOSZEŃ',
+  privacy: 'Prywatność i informacje prawne',
+  language: 'Język',
+  defaultCountry: 'Kraj domyślny',
+  deleteAccountTitle: 'Usuń konto',
+  deleteBtn: 'Usuń',
+  warning: 'Uwaga',
+  nearbyPoisonNotifTitle: 'Uwaga na trutkę!',
+  nearbyTrashNotifTitle: 'Nielegalne odpady w pobliżu!',
+});
+
+translations.lv = withEnglishFallback({
+  score: 'Pilsētas',
+  profile: 'Profils',
+  guestMode: 'Viesa režīms',
+  loading: 'Ielādē radaru...',
+  heroTitle: 'Kaudžu Mednieks',
+  createAccount: 'Izveidot kontu',
+  signInForXp: 'Piesakies, lai nopelnītu vairāk XP',
+  signInRequired: 'Vispirms piesakies!',
+  locationWaiting: 'Tava atrašanās vieta vēl tiek precizēta.',
+  reportType: 'IZVĒLIES ZIŅOJUMA VEIDU',
+  submitReport: 'NOSŪTĪT ZIŅOJUMU',
+  reportPoop: 'Kaudze',
+  reportBags: 'Atkritumu tvertnes / maisiņi',
+  reportPoison: 'Saindēta ēsma',
+  reportTrash: 'Nelegāli atkritumi',
+  foundIn: 'Atrasts',
+  cleaned: 'ES TO SAKOPU ✅',
+  cleanTitle: 'Tīrs!',
+  reportedSuccess: 'ir ziņots!',
+  cityRanking: '🏆 Pilsētu reitings',
+  top30Cities: 'Top 30 pilsētas',
+  topReporters: '🥇 Top 20 ziņotāji',
+  leaderboardNote: 'Tikai profili ar publiskiem segvārdiem',
+  reportsLabel: 'ziņojumi',
+  filterCountry: '🇪🇺 Valsts',
+  namePlaceholder: 'Tavs vārds',
+  leaderboardProfile: 'Reitinga profils',
+  nicknamePlaceholder: 'Tavs segvārds',
+  allowPublishing: 'Atļaut publicēšanu',
+  publishingHint: 'Rādīt segvārdu Top 20 sarakstā.',
+  pointsInfoTitle: 'Punkti par ziņojumu',
+  cleanUp: 'Sakopšana',
+  reports: 'ZIŅOJUMI',
+  notifications: 'Paziņojumi',
+  openSettings: 'Atvērt iestatījumus',
+  reportFeedback: 'Ziņošanas atsauksme',
+  vibration: 'Vibrācija',
+  sound: 'Skaņa',
+  badgesTitle: 'NOZĪMĪTES UN ZIŅOJUMU VEIDI',
+  privacy: 'Privātums un juridiskā informācija',
+  language: 'Valoda',
+  defaultCountry: 'Mītnes valsts',
+  deleteAccountTitle: 'Dzēst kontu',
+  deleteBtn: 'Dzēst',
+  warning: 'Brīdinājums',
+  nearbyPoisonNotifTitle: 'Brīdinājums par indi!',
+  nearbyTrashNotifTitle: 'Nelegāli atkritumi tuvumā!',
+});
+
 const REPORT_TYPE_EXPIRY_DAYS = {
   POOP: 8,
   BIN_BAGS: null,
@@ -916,6 +1084,7 @@ const isOwnReport = (report, userId) => {
 
 export default function App() {
   const [language, setLanguage] = useState('de');
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [session, setSession] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -944,6 +1113,7 @@ export default function App() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [filterType, setFilterType] = useState('global'); // 'global', 'country', 'city'
   const [filterCountry, setFilterCountry] = useState('DE');
+  const [scoreFilterType, setScoreFilterType] = useState('global');
   const [stats, setStats] = useState({ 
     points: 0, total: 0, clean: 0, poison: 0, bins: 0, cityCount: 0, sizeTypes: 0, level: 1, levelName: "Gehweg-Novize"
   });
@@ -968,12 +1138,13 @@ export default function App() {
   }, [language]);
 
   const changeLanguage = async (nextLang) => {
-    if (nextLang === language) return;
+    if (!SUPPORTED_LANGUAGE_CODES.includes(nextLang) || nextLang === language) return;
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (e) {}
     setLanguage(nextLang);
     await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, nextLang);
+    setShowLanguageModal(false);
   };
 
   const getBadgeMetaForPoints = (points = 0, cleanCount = 0, lang = language) => {
@@ -1198,8 +1369,9 @@ export default function App() {
         setReportSoundEnabled(JSON.parse(storedValues[REPORT_SOUND_STORAGE_KEY]));
       }
 
-      if (storedValues[LANGUAGE_STORAGE_KEY] && (storedValues[LANGUAGE_STORAGE_KEY] === 'de' || storedValues[LANGUAGE_STORAGE_KEY] === 'en')) {
-        setLanguage(storedValues[LANGUAGE_STORAGE_KEY]);
+      const savedLanguage = storedValues[LANGUAGE_STORAGE_KEY];
+      if (savedLanguage && SUPPORTED_LANGUAGE_CODES.includes(savedLanguage)) {
+        setLanguage(savedLanguage);
       }
     } catch (error) {
       console.log('Fehler beim Laden der Einstellungen:', error);
@@ -1449,7 +1621,7 @@ export default function App() {
         setPublishInList(data.publish_in_list === true);
         
         // Internationalisierung: Default-Werte aus Profil
-        if (data.default_language) {
+        if (data.default_language && SUPPORTED_LANGUAGE_CODES.includes(data.default_language)) {
           setLanguage(data.default_language);
         }
         if (data.default_country) {
@@ -1684,12 +1856,25 @@ export default function App() {
       const counts = visibleReports.reduce((acc, item) => {
         if (getNormalizedReportType(item.size) !== 'POOP') return acc;
         if (item.city && item.city !== "Ortung..." && item.city !== "Locating...") {
-          acc[item.city] = (acc[item.city] || 0) + 1; 
+          const cityName = item.city.trim();
+          const countryCode = String(item.country_code || 'DE').toUpperCase();
+          const statsKey = `${cityName}__${countryCode}`;
+
+          if (!acc[statsKey]) {
+            const countryMeta = getCountryMetaByCode(countryCode);
+            acc[statsKey] = {
+              name: cityName,
+              count: 0,
+              countryCode,
+              countryFlag: countryMeta.flag,
+            };
+          }
+
+          acc[statsKey].count += 1;
         }
-        return acc; 
+        return acc;
       }, {});
-      const sorted = Object.keys(counts)
-        .map(city => ({ name: city, count: counts[city] }))
+      const sorted = Object.values(counts)
         .sort((a, b) => b.count - a.count)
         .slice(0, 30);
       setCityStats(sorted);
@@ -1867,13 +2052,22 @@ export default function App() {
     loadLeaderboard();
   };
 
-  const jumpToCity = (cityName) => {
+  const jumpToCity = (cityName, countryCode) => {
     if (!cityName) return;
     const normalizedCityName = cityName.trim().toLowerCase();
-    let cityMarker = markers.find(m => m.city?.trim().toLowerCase() === normalizedCityName);
+    const normalizedCountryCode = String(countryCode || '').toUpperCase();
+    let cityMarker = markers.find((m) => {
+      const markerCity = m.city?.trim().toLowerCase();
+      const markerCountry = String(m.country_code || '').toUpperCase();
+      return markerCity === normalizedCityName && (!normalizedCountryCode || markerCountry === normalizedCountryCode);
+    });
 
     if (!cityMarker) {
-      cityMarker = markers.find(m => m.city?.trim().toLowerCase().includes(normalizedCityName));
+      cityMarker = markers.find((m) => {
+        const markerCity = m.city?.trim().toLowerCase();
+        const markerCountry = String(m.country_code || '').toUpperCase();
+        return markerCity?.includes(normalizedCityName) && (!normalizedCountryCode || markerCountry === normalizedCountryCode);
+      });
     }
 
     if (cityMarker) {
@@ -1895,12 +2089,35 @@ export default function App() {
     }
   };
 
+  const resolveCountryCodeForCoords = async (coords) => {
+    if (!coords?.latitude || !coords?.longitude) return null;
+
+    try {
+      const reverse = await Location.reverseGeocodeAsync({
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      });
+
+      const isoCode = reverse?.[0]?.isoCountryCode;
+      if (!isoCode) return null;
+      return String(isoCode).toUpperCase();
+    } catch (error) {
+      console.log('Country reverse-geocode failed:', error);
+      return null;
+    }
+  };
+
   const reportPoop = async () => {
     if (!session) { Alert.alert(t.stop, t.signInRequired); return; }
     if (!location || currentCity === "Ortung..." || currentCity === "Locating...") {
       Alert.alert(t.wait, t.locationWaiting);
       return;
     }
+
+    const markerCountryCode =
+      (await resolveCountryCodeForCoords(location)) ||
+      (currentCountryCode ? String(currentCountryCode).toUpperCase() : null) ||
+      defaultCountry;
 
     await playReportFeedback();
     
@@ -1910,6 +2127,7 @@ export default function App() {
       longitude: location.longitude,
       size: selectedSize,
       city: currentCity,
+      country_code: markerCountryCode,
       created_at: new Date().toISOString()
     };
     setMarkers(prevMarkers => [...prevMarkers, tempMarker]);
@@ -1921,7 +2139,7 @@ export default function App() {
         longitude: location.longitude,
         size: selectedSize,
         city: currentCity,
-        country_code: currentCountryCode || defaultCountry,
+        country_code: markerCountryCode,
         city_name: currentCity,
       }])
       .select();
@@ -2191,32 +2409,54 @@ export default function App() {
       {activeTab === 'Score' && (
         <View style={styles.scoreContainer}>
           <Text style={styles.scoreTitle}>{t.cityRanking}</Text>
-          <View style={styles.filterSegmentRow}>
-            {SUPPORTED_COUNTRIES.slice(0, 8).map(c => (
-              <TouchableOpacity 
-                key={c.code} 
-                style={[styles.miniFilterBtn, filterCountry === c.code && styles.miniFilterBtnActive]}
-                onPress={() => { setFilterCountry(c.code); fetchAllMarkers(); }}
-              >
-                <Text style={[styles.miniFilterText, filterCountry === c.code && styles.miniFilterTextActive]}>{c.code}</Text>
-              </TouchableOpacity>
-            ))}
+
+          <View style={styles.leaderboardFilterRow}>
+            <TouchableOpacity
+              style={[styles.filterTab, scoreFilterType === 'global' && styles.filterTabActive]}
+              onPress={() => setScoreFilterType('global')}
+            >
+              <Text style={[styles.filterTabText, scoreFilterType === 'global' && styles.filterTabTextActive]}>{t.filterGlobal}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.filterTab, scoreFilterType === 'country' && styles.filterTabActive]}
+              onPress={() => setScoreFilterType('country')}
+            >
+              <Text style={[styles.filterTabText, scoreFilterType === 'country' && styles.filterTabTextActive]}>{t.filterCountry} ({filterCountry})</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.scoreSubTitle}>{t.top30Cities} ({filterCountry})</Text>
+
+          {scoreFilterType === 'country' && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.countryFilterScroll}>
+              {SUPPORTED_COUNTRIES.map((c) => (
+                <TouchableOpacity
+                  key={c.code}
+                  style={[styles.countryChip, filterCountry === c.code && styles.countryChipActive]}
+                  onPress={() => setFilterCountry(c.code)}
+                >
+                  <Text style={styles.countryChipFlag}>{c.flag}</Text>
+                  <Text style={[styles.countryChipText, filterCountry === c.code && styles.countryChipTextActive]}>{c.code}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+
+          <Text style={styles.scoreSubTitle}>{scoreFilterType === 'global' ? t.top30Cities : `${t.top30Cities} (${filterCountry})`}</Text>
           <FlatList 
             data={cityStats.filter(item => {
-              // Wir müssten hier nach Land filtern, die cityStats kommen aber aus fetchAllMarkers
-              // Für echtes Country-Filter-Ranking brauchen wir die country_code Spalte in reports
-              return true; 
+              if (scoreFilterType === 'global') return true;
+              return item.countryCode === filterCountry;
             })} 
-            keyExtractor={(item) => item.name} 
+            keyExtractor={(item) => `${item.name}-${item.countryCode || 'XX'}`} 
             renderItem={({item, index}) => (
               <TouchableOpacity 
                 style={[styles.scoreItem, styles.shadow]} 
-                onPress={() => jumpToCity(item.name)}
+                onPress={() => jumpToCity(item.name, item.countryCode)}
               >
                 <Text style={styles.scoreRank}>#{index+1}</Text>
-                <Text style={{flex: 1, fontSize: 16, fontWeight: '600'}}>{item.name}</Text>
+                <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+                  <Text style={styles.cityCountryFlag}>{item.countryFlag || '🏳️'}</Text>
+                  <Text style={{flex: 1, fontSize: 16, fontWeight: '600'}}>{item.name}</Text>
+                </View>
                 <Text style={{fontWeight: 'bold', fontSize: 16, color: '#8B4513'}}>{item.count} 💩</Text>
               </TouchableOpacity>
           )} />
@@ -2250,6 +2490,7 @@ export default function App() {
                   style={[styles.countryChip, filterCountry === c.code && styles.countryChipActive]}
                   onPress={() => { setFilterCountry(c.code); setTimeout(() => loadLeaderboard(), 50); }}
                 >
+                  <Text style={styles.countryChipFlag}>{c.flag}</Text>
                   <Text style={[styles.countryChipText, filterCountry === c.code && styles.countryChipTextActive]}>{c.code}</Text>
                 </TouchableOpacity>
               ))}
@@ -2311,22 +2552,13 @@ export default function App() {
             <View style={styles.languageHeaderRow}>
               <Text style={styles.notificationSectionTitle}>{t.language}</Text>
             </View>
-            <View style={styles.languagePickerRow}>
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <TouchableOpacity
-                  key={lang.code}
-                  style={[
-                    styles.langChoiceBtn,
-                    language === lang.code && styles.langChoiceBtnActive
-                  ]}
-                  onPress={() => changeLanguage(lang.code)}
-                >
-                  <Text style={styles.langChoiceFlag}>{lang.flag}</Text>
-                  <Text style={[styles.langChoiceCode, language === lang.code && styles.langChoiceCodeActive]}>
-                    {lang.code.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View style={styles.languageCurrentRow}>
+              <Text style={styles.languageCurrentText}>
+                {(SUPPORTED_LANGUAGES.find((lang) => lang.code === language)?.flag || '🌐')} {(SUPPORTED_LANGUAGES.find((lang) => lang.code === language)?.label || language.toUpperCase())}
+              </Text>
+              <TouchableOpacity style={styles.languageOpenModalBtn} onPress={() => setShowLanguageModal(true)}>
+                <Text style={styles.languageOpenModalText}>{t.language}</Text>
+              </TouchableOpacity>
             </View>
 
             <View style={[styles.languageHeaderRow, { marginTop: 20 }]}>
@@ -2342,6 +2574,7 @@ export default function App() {
                   ]}
                   onPress={() => setDefaultCountry(c.code)}
                 >
+                  <Text style={styles.countryChoiceFlag}>{c.flag}</Text>
                   <Text style={[styles.countryChoiceText, defaultCountry === c.code && styles.countryChoiceTextActive]}>
                     {c.code}
                   </Text>
@@ -2526,7 +2759,7 @@ export default function App() {
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity onPress={() => openLegal(t.privacy, language === 'en' ? datenschutzTextEn : datenschutzText)} style={{marginBottom: 10}}>
+            <TouchableOpacity onPress={() => openLegal(t.privacy, language === 'de' ? datenschutzText : datenschutzTextEn)} style={{marginBottom: 10}}>
               <Text style={styles.footerLink}>{t.privacy}</Text>
             </TouchableOpacity>
             <TouchableOpacity 
@@ -2573,6 +2806,30 @@ export default function App() {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={showLanguageModal} transparent animationType="slide" onRequestClose={() => setShowLanguageModal(false)}>
+        <View style={styles.languageModalBackdrop}>
+          <View style={styles.languageModalCard}>
+            <Text style={styles.languageModalTitle}>{t.language}</Text>
+            <ScrollView style={styles.languageModalList}>
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[styles.languageModalItem, language === lang.code && styles.languageModalItemActive]}
+                  onPress={() => changeLanguage(lang.code)}
+                >
+                  <Text style={styles.languageModalFlag}>{lang.flag}</Text>
+                  <Text style={[styles.languageModalLabel, language === lang.code && styles.languageModalLabelActive]}>{lang.label}</Text>
+                  <Text style={[styles.languageModalCode, language === lang.code && styles.languageModalCodeActive]}>{lang.code.toUpperCase()}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity onPress={() => setShowLanguageModal(false)} style={styles.languageModalCloseBtn}>
+              <Text style={styles.languageModalCloseText}>{t.close}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
       <Modal visible={legalVisible} transparent animationType="fade">
@@ -2654,9 +2911,14 @@ const styles = StyleSheet.create({
   langChoiceFlag: { fontSize: 24, marginBottom: 4 },
   langChoiceCode: { fontSize: 12, fontWeight: 'bold', color: '#8E8E93' },
   langChoiceCodeActive: { color: '#8B4513' },
+  languageCurrentRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
+  languageCurrentText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#333', marginRight: 10 },
+  languageOpenModalBtn: { backgroundColor: '#8B4513', borderRadius: 12, paddingVertical: 9, paddingHorizontal: 14 },
+  languageOpenModalText: { color: 'white', fontWeight: '700', fontSize: 12 },
   countryPickerScroll: { marginTop: 10, flexDirection: 'row' },
-  countryChoiceBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: '#F5F5F7', borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: '#E5E5E7' },
+  countryChoiceBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: '#F5F5F7', borderRadius: 20, marginRight: 8, borderWidth: 1, borderColor: '#E5E5E7', flexDirection: 'row', alignItems: 'center' },
   countryChoiceBtnActive: { backgroundColor: '#8B4513', borderColor: '#8B4513' },
+  countryChoiceFlag: { fontSize: 14, marginRight: 6 },
   countryChoiceText: { fontSize: 13, fontWeight: 'bold', color: '#8E8E93' },
   countryChoiceTextActive: { color: 'white' },
   leaderboardFilterRow: { flexDirection: 'row', backgroundColor: '#EEE', borderRadius: 12, padding: 4, marginBottom: 15, marginTop: 10 },
@@ -2665,10 +2927,25 @@ const styles = StyleSheet.create({
   filterTabText: { fontSize: 13, fontWeight: '600', color: '#888' },
   filterTabTextActive: { color: '#8B4513' },
   countryFilterScroll: { marginBottom: 15, maxHeight: 40 },
-  countryChip: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#F0F0F0', borderRadius: 15, marginRight: 8, height: 30 },
+  countryChip: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#F0F0F0', borderRadius: 15, marginRight: 8, height: 30, flexDirection: 'row', alignItems: 'center' },
   countryChipActive: { backgroundColor: '#CBA27A' },
+  countryChipFlag: { fontSize: 12, marginRight: 5 },
   countryChipText: { fontSize: 12, fontWeight: 'bold', color: '#666' },
   countryChipTextActive: { color: 'white' },
+  cityCountryFlag: { fontSize: 16, marginRight: 8 },
+  languageModalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  languageModalCard: { backgroundColor: 'white', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 24, maxHeight: '78%' },
+  languageModalTitle: { fontSize: 20, fontWeight: '700', color: '#222', marginBottom: 12 },
+  languageModalList: { marginBottom: 14 },
+  languageModalItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10, borderRadius: 12, borderWidth: 1, borderColor: '#ECECEC', marginBottom: 8, backgroundColor: '#FAFAFA' },
+  languageModalItemActive: { borderColor: '#8B4513', backgroundColor: '#FDF5E6' },
+  languageModalFlag: { fontSize: 20, marginRight: 10 },
+  languageModalLabel: { flex: 1, fontSize: 15, color: '#333', fontWeight: '600' },
+  languageModalLabelActive: { color: '#8B4513' },
+  languageModalCode: { fontSize: 12, fontWeight: '700', color: '#999' },
+  languageModalCodeActive: { color: '#8B4513' },
+  languageModalCloseBtn: { backgroundColor: '#8B4513', borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  languageModalCloseText: { color: 'white', fontWeight: '700', fontSize: 15 },
   filterSegmentRow: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 15 },
   miniFilterBtn: { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: '#F0F0F0', borderRadius: 10, marginRight: 5, marginBottom: 5 },
   miniFilterBtnActive: { backgroundColor: '#8B4513' },
