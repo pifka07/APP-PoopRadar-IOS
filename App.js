@@ -2243,7 +2243,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, styles.shadow]}>
+      <View style={[styles.header, styles.shadow, { paddingTop: Platform.OS === 'ios' ? 48 : 18 }]}>
         <View><Text style={styles.xpTitle}>{session ? t.pro : t.guest}</Text><Text style={styles.xpValue}>{stats.points} XP | {displayCity}</Text></View>
       </View>
 
@@ -2255,7 +2255,7 @@ export default function App() {
                 size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
                 unitId={Platform.OS === 'android'
                   ? 'ca-app-pub-2590841526378095/9563401535'
-                  : 'ca-app-pub-3940256099942544/2934735716'}
+                  : 'ca-app-pub-2590841526378095/3502464953'}
                 requestOptions={{
                   requestNonPersonalizedAdsOnly: false,
                 }}
@@ -2662,23 +2662,6 @@ export default function App() {
               <Text style={styles.statValue}>{stats.clean}</Text>
               <Text style={styles.statLabel}>{t.clean}</Text>
             </View>
-          </View>
-
-          <View style={[styles.notificationSection, styles.shadow]}>
-            <Text style={styles.notificationSectionTitle}>{t.notifications}</Text>
-            <Text style={styles.notificationStatusText}>
-              {notificationStatus === 'granted'
-                ? t.notificationsOn
-                : notificationStatus === 'denied'
-                ? t.notificationsOff
-                : t.notificationsUnknown}
-            </Text>
-            <Text style={styles.notificationStatusText}>{t.pushToken}: {pushTokenStatus}</Text>
-            {notificationStatus !== 'granted' && (
-              <TouchableOpacity onPress={openNotificationSettings} style={styles.openSettingsBtn}>
-                <Text style={styles.openSettingsBtnText}>{t.openSettings}</Text>
-              </TouchableOpacity>
-            )}
           </View>
 
           <View style={[styles.notificationSection, styles.shadow]}>
